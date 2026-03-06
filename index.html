@@ -13,10 +13,10 @@
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Dependencies (PDF & OCR) -->
+    <!-- Dependencies (PDF & OCR - Upgraded to v5) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
     <style>
         /* --- CSS VARIABLES & THEMING --- */
@@ -31,6 +31,9 @@
             --text-muted: #64748b;
             --border: #e2e8f0;
             --input-bg: #f8fafc;
+            --success: #10b981;
+            --danger: #ef4444;
+            --danger-bg: #fee2e2;
             --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             --radius: 12px;
             --font-ui: 'Inter', sans-serif;
@@ -49,6 +52,7 @@
             --text-muted: #94a3b8;
             --border: #334155;
             --input-bg: #334155;
+            --danger-bg: #451a1a;
             --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.5);
         }
 
@@ -68,266 +72,146 @@
 
         /* --- LOADING SCREEN --- */
         #loading-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-body);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-body); z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
             transition: opacity 0.5s ease;
         }
         
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid var(--border);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
+            width: 50px; height: 50px;
+            border: 5px solid var(--border); border-top-color: var(--primary);
+            border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem;
         }
-
         @keyframes spin { to { transform: rotate(360deg); } }
 
         /* --- HEADER --- */
         header {
-            background: var(--bg-card);
-            border-bottom: 1px solid var(--border);
-            padding: 0.75rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 10;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
+            background: var(--bg-card); border-bottom: 1px solid var(--border);
+            padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center; z-index: 10;
         }
 
-        .brand {
-            font-weight: 700;
-            font-size: 1.25rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--primary);
-            cursor: pointer;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
+        .brand { font-weight: 700; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem; color: var(--primary); cursor: pointer; }
+        .header-actions { display: flex; gap: 1rem; align-items: center; }
 
         .profile-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--input-bg);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
+            width: 40px; height: 40px; border-radius: 50%;
+            background: var(--input-bg); border: 1px solid var(--border); color: var(--text-main);
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
         }
         .profile-btn:hover { border-color: var(--primary); color: var(--primary); }
 
         /* --- BUTTONS --- */
         .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            font-weight: 500;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-            font-family: var(--font-ui);
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+            padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 500; font-size: 0.875rem;
+            cursor: pointer; transition: all 0.2s; border: 1px solid transparent; font-family: var(--font-ui);
         }
-
         .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); }
         .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
-        .btn-primary:active { transform: translateY(0); }
         .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
         
         .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
         .btn-ghost:hover { background: var(--input-bg); color: var(--text-main); border-color: var(--text-muted); }
-        .btn-danger { background: #fee2e2; color: #ef4444; border: 1px solid #fca5a5; }
-        .btn-danger:hover { background: #fecaca; }
+        
+        .btn-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger); }
+        .btn-danger:hover { background: var(--danger); color: white; }
 
-        .btn-icon { padding: 0.5rem; border-radius: 50%; border: none; background: transparent; color: var(--text-muted); font-size: 1.1rem; }
+        .btn-icon { padding: 0.5rem; border-radius: 50%; border: none; background: transparent; color: var(--text-muted); font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
         .btn-icon:hover { background: var(--input-bg); color: var(--primary); }
+        .btn-icon.danger:hover { color: var(--danger); background: var(--danger-bg); }
 
         /* --- LAYOUT --- */
-        main {
-            flex: 1;
-            display: flex;
-            overflow: hidden;
-            position: relative;
-        }
+        main { flex: 1; display: flex; overflow: hidden; position: relative; }
 
         /* --- SIDEBAR --- */
         .sidebar {
-            width: 260px;
-            background: var(--bg-sidebar);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            padding: 1.5rem 1rem;
-            gap: 0.5rem;
-            transition: background-color 0.3s ease;
+            width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; padding: 1.5rem 1rem; gap: 0.5rem;
         }
         @media(max-width: 768px) { .sidebar { display: none; } }
 
         .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            color: var(--text-muted);
-            text-decoration: none;
-            cursor: pointer;
-            transition: all 0.2s;
+            display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem;
+            border-radius: 8px; color: var(--text-muted); cursor: pointer; transition: all 0.2s;
         }
         .nav-item:hover { background: var(--input-bg); color: var(--text-main); }
         .nav-item.active { background: rgba(37, 99, 235, 0.1); color: var(--primary); font-weight: 500; }
 
+        /* CREATOR WALL - SIDEBAR */
+        .creator-badge {
+            margin-top: auto; padding: 1rem; background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(16, 185, 129, 0.1));
+            border-radius: 8px; font-size: 0.85rem; color: var(--text-main); text-align: center;
+            border: 1px dashed var(--primary); transition: transform 0.2s;
+        }
+        .creator-badge:hover { transform: translateY(-2px); border-style: solid; }
+        .creator-badge i { color: var(--primary); margin-bottom: 5px; font-size: 1.2rem; }
+
         /* --- WORKSPACE --- */
-        .workspace {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            background: var(--bg-body);
-            overflow: hidden;
-        }
+        .workspace { flex: 1; display: flex; flex-direction: column; position: relative; background: var(--bg-body); overflow: hidden; }
 
-        /* --- VIEWS --- */
-        .view {
-            display: none;
-            flex-direction: column;
-            height: 100%;
-            width: 100%;
-            overflow-y: auto;
-            padding: 1.5rem;
-        }
+        .view { display: none; flex-direction: column; height: 100%; width: 100%; overflow-y: auto; padding: 1.5rem; }
         .view.active { display: flex; animation: fadeIn 0.3s ease; }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* --- DASHBOARD (HOME) --- */
         .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            max-width: 1000px;
-            width: 100%;
-            margin: 0 auto;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;
+            max-width: 1000px; width: 100%; margin: 0 auto;
         }
 
         .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            box-shadow: var(--shadow);
-            transition: all 0.2s;
-            cursor: pointer;
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 2rem; display: flex; flex-direction: column; gap: 1rem; box-shadow: var(--shadow);
+            transition: all 0.2s; cursor: pointer;
         }
         .card:hover { transform: translateY(-4px); border-color: var(--primary); }
         .card i { font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem; }
         .card h3 { margin: 0; font-size: 1.25rem; }
         .card p { margin: 0; color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
 
+        /* CREATOR WALL - HOME CARD */
+        .creator-card {
+            background: linear-gradient(135deg, var(--bg-card), rgba(37, 99, 235, 0.05));
+            border-color: var(--primary); text-align: center;
+        }
+
         /* --- EDITOR --- */
         .editor-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-y: auto;
-            padding: 1rem;
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            overflow-y: auto; /* Allows smooth scrolling */
+            padding: 1rem; padding-bottom: 5rem;
         }
 
         .toolbar {
-            background: var(--bg-card);
-            padding: 0.5rem 1rem;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-            justify-content: center;
-            position: sticky;
-            top: 10px;
-            z-index: 5;
+            background: var(--bg-card); padding: 0.5rem 1rem; border-radius: var(--radius);
+            box-shadow: var(--shadow); display: flex; gap: 0.5rem; margin-bottom: 1.5rem;
+            flex-wrap: wrap; justify-content: center; position: sticky; top: 0px; z-index: 5;
             border: 1px solid var(--border);
         }
 
         .paper {
-            width: 100%;
-            max-width: 210mm;
-            min-height: 297mm;
-            background: #ffffff; /* Always white paper for PDF contrast */
-            color: #000000;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            padding: 25mm;
-            font-family: var(--font-doc);
-            font-size: 12pt;
-            line-height: 1.6;
-            outline: none;
-            overflow: hidden;
-            transition: font-family 0.3s;
+            width: 100%; max-width: 210mm; min-height: 297mm;
+            background: #ffffff; color: #000000; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            padding: 25mm; font-family: var(--font-doc); font-size: 12pt; line-height: 1.6;
+            outline: none; transition: font-family 0.3s;
+            /* FIX: Removed 'overflow: hidden' to allow content expansion & scrolling */
+            height: max-content; 
         }
         
         .paper.template-minimal { font-family: 'Inter', sans-serif; }
         .paper.template-academic { font-family: 'Times New Roman', serif; }
-        .paper.template-code { 
-            font-family: 'Roboto Mono', monospace; 
-            background: #f8fafc; 
-            color: #333; 
-        }
+        .paper.template-code { font-family: 'Roboto Mono', monospace; background: #f8fafc; color: #333; }
 
-        [contenteditable]:empty:before {
-            content: attr(placeholder);
-            color: #ccc;
-            display: block;
-        }
+        [contenteditable]:empty:before { content: attr(placeholder); color: #ccc; display: block; }
 
         /* --- OCR --- */
-        .ocr-area {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-            max-width: 800px;
-            margin: 0 auto;
-        }
+        .ocr-area { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; max-width: 800px; margin: 0 auto; }
         .drop-zone {
-            width: 100%;
-            height: 300px;
-            border: 2px dashed var(--border);
-            border-radius: var(--radius);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg-card);
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-            overflow: hidden;
+            width: 100%; height: 300px; border: 2px dashed var(--border); border-radius: var(--radius);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: var(--bg-card); color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+            position: relative; overflow: hidden;
         }
         .drop-zone:hover, .drop-zone.drag-over { border-color: var(--primary); background: var(--input-bg); }
         .drop-zone img { max-width: 100%; max-height: 100%; object-fit: contain; display: none; z-index: 2; }
@@ -337,25 +221,18 @@
 
         /* --- MODALS --- */
         .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(4px);
-            display: flex; align-items: center; justify-content: center;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center;
             z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.2s;
         }
         .modal-overlay.open { opacity: 1; pointer-events: auto; }
 
         .modal {
-            background: var(--bg-card);
-            width: 90%; max-width: 500px;
-            border-radius: var(--radius);
-            padding: 2rem;
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.2);
-            transform: translateY(20px); transition: transform 0.2s;
-            border: 1px solid var(--border);
+            background: var(--bg-card); width: 90%; max-width: 500px; border-radius: var(--radius);
+            padding: 2rem; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.2);
+            transform: translateY(20px); transition: transform 0.2s; border: 1px solid var(--border);
         }
         .modal-overlay.open .modal { transform: translateY(0); }
-
         .modal-header { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
         .modal-body { display: flex; flex-direction: column; gap: 1.25rem; }
         
@@ -364,27 +241,19 @@
         .form-input, .form-select {
             padding: 0.8rem; border: 1px solid var(--border); border-radius: 8px;
             background: var(--input-bg); color: var(--text-main); font-family: var(--font-ui); font-size: 1rem;
-            transition: border-color 0.2s;
         }
         .form-input:focus { border-color: var(--primary); }
-
-        .theme-toggle-row {
-            display: flex; justify-content: space-between; align-items: center;
-            background: var(--input-bg); padding: 0.8rem; border-radius: 8px;
-        }
+        .theme-toggle-row { display: flex; justify-content: space-between; align-items: center; background: var(--input-bg); padding: 0.8rem; border-radius: 8px; }
 
         /* --- MOBILE NAV --- */
         .mobile-nav {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: var(--bg-card); border-top: 1px solid var(--border);
+            position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); border-top: 1px solid var(--border);
             display: flex; justify-content: space-around; padding: 0.75rem; z-index: 50;
         }
         @media(min-width: 769px) { .mobile-nav { display: none; } }
-
         .mobile-nav-item {
-            display: flex; flex-direction: column; align-items: center;
-            font-size: 0.75rem; color: var(--text-muted); background: none;
-            border: none; gap: 4px; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; color: var(--text-muted);
+            background: none; border: none; gap: 4px; cursor: pointer;
         }
         .mobile-nav-item.active { color: var(--primary); }
         .mobile-nav-item i { font-size: 1.25rem; }
@@ -392,25 +261,20 @@
         /* --- TOAST --- */
         .toast {
             position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
-            background: #1e293b; color: white; padding: 0.8rem 1.5rem;
-            border-radius: 50px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
-            opacity: 0; pointer-events: none; transition: all 0.3s; z-index: 200;
-            font-size: 0.9rem; display: flex; align-items: center; gap: 0.75rem;
+            background: #1e293b; color: white; padding: 0.8rem 1.5rem; border-radius: 50px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); opacity: 0; pointer-events: none; transition: all 0.3s;
+            z-index: 200; font-size: 0.9rem; display: flex; align-items: center; gap: 0.75rem;
         }
         .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
         /* --- HISTORY LIST ITEMS --- */
         .history-item {
-            background: var(--bg-card); padding: 1rem; border-radius: 8px;
+            background: var(--bg-card); padding: 1rem 1.5rem; border-radius: 8px;
             border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
-            transition: transform 0.2s;
+            transition: transform 0.2s, border-color 0.2s;
         }
-        .history-item:hover { border-color: var(--primary); }
-
-        .empty-state {
-            text-align: center; color: var(--text-muted); padding: 3rem;
-            background: var(--input-bg); border-radius: var(--radius); border: 1px dashed var(--border);
-        }
+        .history-item:hover { border-color: var(--primary); transform: translateX(4px); }
+        .empty-state { text-align: center; color: var(--text-muted); padding: 3rem; background: var(--input-bg); border-radius: var(--radius); border: 1px dashed var(--border); }
 
     </style>
 </head>
@@ -461,6 +325,13 @@
             <a class="nav-item" onclick="navigate('history')">
                 <i class="fa-solid fa-clock-rotate-left"></i> History
             </a>
+
+            <!-- CREATOR WALL (SIDEBAR) -->
+            <div class="creator-badge">
+                <i class="fa-solid fa-code"></i><br>
+                <span>Creator Wall</span><br>
+                <strong style="font-size: 1rem; color: var(--primary);">BHAT BOYKA</strong>
+            </div>
         </nav>
 
         <!-- WORKSPACE -->
@@ -484,16 +355,19 @@
                         <h3>Scan Image</h3>
                         <p>Extract text from images using on-device OCR.</p>
                     </div>
-                    <div class="card" onclick="document.getElementById('fileImport').click()">
-                        <i class="fa-solid fa-file-import"></i>
-                        <h3>Import Text</h3>
-                        <p>Load .txt or .md files into the editor.</p>
-                        <input type="file" id="fileImport" accept=".txt,.md" style="display: none;" onchange="handleFileImport(this)">
+                    <!-- CREATOR WALL (HOME CARD) -->
+                    <div class="card creator-card" onclick="showToast('App crafted with ♥ by BHAT BOYKA')">
+                        <i class="fa-solid fa-crown" style="color: #f59e0b;"></i>
+                        <h3>Creator Wall</h3>
+                        <p>App Engineered By<br><strong style="font-size: 1.1rem; color: var(--text-main);">BHAT BOYKA</strong></p>
                     </div>
                 </div>
 
-                <div style="margin-top: 4rem; max-width: 800px; width: 100%; margin-left: auto; margin-right: auto;">
-                    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-muted);">Recent Activity</h3>
+                <div style="margin-top: 4rem; max-width: 1000px; width: 100%; margin-left: auto; margin-right: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="font-size: 1.1rem; margin: 0; color: var(--text-muted);">Recent Activity</h3>
+                        <button class="btn btn-ghost" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;" onclick="navigate('history')">View All</button>
+                    </div>
                     <div id="recent-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
                         <!-- Populated by JS -->
                     </div>
@@ -516,12 +390,15 @@
                         <button class="btn-icon" title="Heading 1" onclick="formatDoc('formatBlock', 'H1')"><i class="fa-solid fa-heading"></i></button>
                         <button class="btn-icon" title="List" onclick="formatDoc('insertUnorderedList')"><i class="fa-solid fa-list-ul"></i></button>
                         <div style="width: 1px; background: var(--border); height: 24px; margin: 0 0.5rem;"></div>
-                        <button class="btn-ghost" onclick="saveDraft()"><i class="fa-regular fa-floppy-disk"></i> Save</button>
+                        <button class="btn-ghost" onclick="document.getElementById('fileImport').click()"><i class="fa-solid fa-file-import"></i> Import</button>
+                        <input type="file" id="fileImport" accept=".txt,.md" style="display: none;" onchange="handleFileImport(this)">
+                        <button class="btn-primary" onclick="saveDraft()"><i class="fa-regular fa-floppy-disk"></i> Save</button>
                     </div>
 
                     <div id="editor-paper" class="paper" contenteditable="true" placeholder="Start typing here...">
                         <h1>Untitled Document</h1>
                         <p>This is a privacy-first editor. Your content stays on your device.</p>
+                        <p><strong>Pro tip:</strong> Keep typing. If the text becomes too long, the page will now properly expand, and you can scroll smoothly to the bottom!</p>
                     </div>
                 </div>
             </div>
@@ -530,7 +407,7 @@
             <div id="view-ocr" class="view">
                 <div class="ocr-area">
                     <div style="text-align: center;">
-                        <h2>Image to Text</h2>
+                        <h2>Image to Text Scanner</h2>
                         <p style="color: var(--text-muted);">Secure OCR runs 100% locally in your browser.</p>
                     </div>
 
@@ -546,11 +423,11 @@
                     <div class="progress-bar" id="ocrProgress">
                         <div class="progress-fill" id="ocrFill"></div>
                     </div>
-                    <div id="ocrStatus" style="font-size: 0.9rem; color: var(--text-muted); height: 1.2em;"></div>
+                    <div id="ocrStatus" style="font-size: 0.9rem; font-weight: 500; color: var(--primary); height: 1.2em;"></div>
 
                     <div id="ocrActions" style="display: none; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-top: 1rem;">
-                        <button class="btn btn-primary" onclick="runOCR()">Extract Text</button>
-                        <button class="btn btn-ghost" onclick="resetOCR()">Clear</button>
+                        <button class="btn btn-primary" id="btnExtract" onclick="runOCR()"><i class="fa-solid fa-wand-magic-sparkles"></i> Extract Text</button>
+                        <button class="btn btn-ghost" onclick="resetOCR()">Clear Image</button>
                     </div>
                 </div>
             </div>
@@ -561,11 +438,11 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                         <h2>Activity History</h2>
                         <button class="btn btn-danger" onclick="clearHistory()">
-                            <i class="fa-solid fa-trash"></i> Clear All
+                            <i class="fa-solid fa-trash-can"></i> Clear All
                         </button>
                     </div>
                     
-                    <p style="color: var(--text-muted); margin-bottom: 2rem;">Log of PDF exports and actions stored locally.</p>
+                    <p style="color: var(--text-muted); margin-bottom: 2rem;">Log of PDF exports and actions. Data is stored locally.</p>
                     
                     <div id="history-list" style="display: flex; flex-direction: column; gap: 1rem;">
                         <!-- Populated by JS -->
@@ -587,7 +464,7 @@
             <i class="fa-solid fa-camera"></i> OCR
         </button>
         <button class="mobile-nav-item" onclick="navigate('history')">
-            <i class="fa-solid fa-clock-rotate-left"></i> Files
+            <i class="fa-solid fa-clock-rotate-left"></i> History
         </button>
     </nav>
 
@@ -634,8 +511,6 @@
                     <input type="text" id="profileName" class="form-input" placeholder="Your Name">
                 </div>
                 
-                <!-- API Key section removed from UI as requested -->
-                
                 <div class="theme-toggle-row">
                     <span>Dark Mode</span>
                     <button class="btn-icon" id="themeToggleBtn" onclick="toggleTheme()">
@@ -656,22 +531,19 @@
 
     <!-- TOAST -->
     <div id="toast" class="toast">
-        <i class="fa-solid fa-check-circle" style="color: var(--success);"></i>
+        <i class="fa-solid fa-circle-info" style="color: var(--primary);"></i>
         <span id="toastMessage">Operation successful</span>
     </div>
 
     <script>
         // --- CONFIGURATION & STATE ---
-        let USER_API_KEY = "";
-        
         const state = {
             currentView: 'home',
             ocrImage: null,
             projects: [],
             user: {
                 name: 'Guest',
-                theme: 'light',
-                apiKey: '' 
+                theme: 'light'
             }
         };
 
@@ -704,7 +576,6 @@
             const savedUser = localStorage.getItem('textpdf_user');
             if (savedUser) {
                 state.user = JSON.parse(savedUser);
-                USER_API_KEY = state.user.apiKey || "";
             }
             applyTheme(state.user.theme);
             updateProfileUI();
@@ -736,12 +607,8 @@
                 document.querySelectorAll('.mobile-nav-item')[navIndex].classList.add('active');
             }
 
-            if (viewId === 'history') {
-                renderHistory();
-            }
-            if (viewId === 'home') {
-                loadRecentProjects();
-            }
+            if (viewId === 'history') renderHistory();
+            if (viewId === 'home') loadRecentProjects();
         }
 
         // --- PROFILE ---
@@ -757,7 +624,6 @@
 
         function saveProfile() {
             state.user.name = document.getElementById('profileName').value || 'Guest';
-            state.user.apiKey = state.user.apiKey; 
             localStorage.setItem('textpdf_user', JSON.stringify(state.user));
             document.getElementById('userNameDisplay').innerText = state.user.name;
             closeModal('profileModal');
@@ -797,7 +663,7 @@
             document.getElementById('templateSelector').value = 'default';
             document.getElementById('editor-paper').className = 'paper';
             navigate('editor');
-            showToast("New project created");
+            showToast("New document started");
         }
 
         function handleFileImport(input) {
@@ -807,9 +673,10 @@
             reader.onload = (e) => {
                 const text = e.target.result;
                 const htmlContent = text.replace(/\n/g, '<br>');
-                document.getElementById('editor-paper').innerHTML = htmlContent;
+                document.getElementById('editor-paper').innerHTML += `<br><br>${htmlContent}`;
                 navigate('editor');
-                showToast("File imported");
+                showToast("Text file imported");
+                addToHistory(file.name, 'Imported TXT/MD');
             };
             reader.readAsText(file);
             input.value = '';
@@ -821,10 +688,10 @@
             showToast("Draft saved locally");
         }
 
-        // --- PDF GENERATION (FIXED FOR ANDROID WEBVIEW) ---
+        // --- PDF GENERATION ---
         async function generatePDF() {
             const btn = document.getElementById('downloadBtn');
-            const originalText = btn.innerText;
+            const originalText = btn.innerHTML;
 
             if (!window.jspdf) {
                 alert("Error: jsPDF library is missing. Please refresh the page.");
@@ -835,26 +702,17 @@
             const filename = document.getElementById('exportFilename').value || 'document';
             const paper = document.getElementById('editor-paper');
 
-            btn.innerText = "Generating...";
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generating...`;
             btn.disabled = true;
 
             try {
-                // 1. Capture Canvas
                 const canvas = await html2canvas(paper, {
-                    scale: 2,
-                    useCORS: true,
-                    allowTaint: true,
-                    backgroundColor: '#ffffff',
-                    logging: false
+                    scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false
                 });
 
-                // Check if canvas is empty
-                if (!canvas || canvas.width === 0 || canvas.height === 0) {
-                    throw new Error("Generated canvas is empty.");
-                }
+                if (!canvas || canvas.width === 0 || canvas.height === 0) throw new Error("Generated canvas is empty.");
 
                 const imgData = canvas.toDataURL('image/jpeg', 0.95);
-                
                 const imgWidth = 190; 
                 const pageHeight = 297;
                 const imgHeight = (canvas.height * imgWidth) / canvas.width;
@@ -863,81 +721,65 @@
 
                 const doc = new jsPDF('p', 'mm', 'a4');
 
-                // Add First Page
                 doc.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
                 heightLeft -= pageHeight;
 
-                // Pagination
                 while (heightLeft >= 0) {
                     position = heightLeft - imgHeight;
                     doc.addPage();
                     doc.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
                     heightLeft -= pageHeight;
                 }
-
-                // 2. FIX FOR ANDROID CRASH:
-                // Instead of doc.save(), we generate a Blob and trigger download manually.
-                // This bypasses the broken download handler in the 'hopweb' app.
                 
                 const pdfBlob = doc.output('blob');
-                
-                // Create a temporary link
                 const link = document.createElement('a');
                 link.href = window.URL.createObjectURL(pdfBlob);
                 link.download = filename + '.pdf';
                 
-                // Append to body, click, and remove
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
                 
-                // Cleanup memory
                 setTimeout(() => window.URL.revokeObjectURL(link.href), 100);
 
                 addToHistory(filename, 'PDF Export');
                 closeModal('exportModal');
-                showToast("PDF Downloaded");
+                showToast("PDF Downloaded Successfully");
 
             } catch (error) {
                 console.error("PDF Generation Failed:", error);
                 alert("Failed to generate PDF: " + error.message);
             } finally {
-                btn.innerText = originalText;
+                btn.innerHTML = originalText;
                 btn.disabled = false;
             }
         }
 
-        // --- HISTORY SYSTEM ---
+        // --- HISTORY SYSTEM (IMPROVED) ---
         function loadHistoryFromStorage() {
             const stored = localStorage.getItem('textpdf_projects');
             if (stored) {
-                try {
-                    state.projects = JSON.parse(stored);
-                } catch (e) {
-                    console.error("Failed to parse history", e);
-                    state.projects = [];
-                }
+                try { state.projects = JSON.parse(stored); } 
+                catch (e) { state.projects = []; }
             } else {
                 state.projects = [];
             }
         }
 
         function addToHistory(name, action) {
-            const newItem = {
-                id: Date.now(),
-                title: name,
-                action: action,
-                date: new Date().toISOString()
-            };
-            
+            const newItem = { id: Date.now(), title: name, action: action, date: new Date().toISOString() };
             state.projects.unshift(newItem);
-            if (state.projects.length > 20) {
-                state.projects = state.projects.slice(0, 20);
-            }
-            
+            if (state.projects.length > 50) state.projects = state.projects.slice(0, 50);
+            localStorage.setItem('textpdf_projects', JSON.stringify(state.projects));
+            if(state.currentView === 'history') renderHistory();
+            if(state.currentView === 'home') loadRecentProjects();
+        }
+
+        function deleteHistoryItem(id) {
+            state.projects = state.projects.filter(p => p.id !== id);
             localStorage.setItem('textpdf_projects', JSON.stringify(state.projects));
             renderHistory();
-            loadRecentProjects();
+            showToast("Item removed from history");
         }
 
         function renderHistory() {
@@ -947,8 +789,8 @@
             if (state.projects.length === 0) {
                 list.innerHTML = `
                     <div class="empty-state">
-                        <i class="fa-solid fa-clipboard-list" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
-                        <p>No history found. Export a PDF to see it here.</p>
+                        <i class="fa-solid fa-clipboard-list" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>No history found. Export a PDF or run an OCR scan to see activity here.</p>
                     </div>
                 `;
                 return;
@@ -957,20 +799,38 @@
             state.projects.forEach(p => {
                 const item = document.createElement('div');
                 item.className = 'history-item';
+                
+                // Format Date nicely
+                const dateObj = new Date(p.date);
+                const dateStr = dateObj.toLocaleDateString() + ' • ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                // Icon based on action
+                let iconClass = "fa-file-pdf";
+                if(p.action.includes('OCR')) iconClass = "fa-camera";
+                if(p.action.includes('Cloud')) iconClass = "fa-cloud-arrow-up";
+
                 item.innerHTML = `
-                    <div>
-                        <div style="font-weight: 600;">${p.title}</div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
-                            ${new Date(p.date).toLocaleString()} — ${p.action}
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="background: var(--input-bg); width: 45px; height: 45px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.2rem;">
+                            <i class="fa-solid ${iconClass}"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 1.05rem; color: var(--text-main);">${p.title}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+                                <i class="fa-regular fa-clock"></i> ${dateStr} &mdash; <strong>${p.action}</strong>
+                            </div>
                         </div>
                     </div>
-                    <i class="fa-solid fa-chevron-right" style="color: var(--text-muted);"></i>
+                    <button class="btn-icon danger" onclick="deleteHistoryItem(${p.id})" title="Delete Record">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
                 `;
                 list.appendChild(item);
             });
         }
 
         function clearHistory() {
+            if(state.projects.length === 0) return;
             if(confirm("Are you sure you want to clear all activity history? This cannot be undone.")) {
                 state.projects = [];
                 localStorage.removeItem('textpdf_projects');
@@ -986,7 +846,7 @@
             
             const recents = state.projects.slice(0, 3);
             if (recents.length === 0) {
-                list.innerHTML = `<div style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 1rem;">No recent activity.</div>`;
+                list.innerHTML = `<div class="empty-state" style="padding: 2rem;"><p style="margin:0;">No recent activity yet.</p></div>`;
                 return;
             }
 
@@ -994,21 +854,26 @@
                 const item = document.createElement('div');
                 item.className = 'history-item';
                 item.style.cursor = 'pointer';
-                item.onclick = () => showToast(`Opened history for: ${p.title}`);
+                item.onclick = () => showToast(`Record: ${p.title}`);
+                
+                let iconClass = "fa-file-pdf";
+                if(p.action.includes('OCR')) iconClass = "fa-camera";
+
                 item.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 1rem;">
-                        <i class="fa-solid fa-file-pdf" style="color: var(--primary); font-size: 1.2rem;"></i>
+                        <i class="fa-solid ${iconClass}" style="color: var(--primary); font-size: 1.2rem;"></i>
                         <div>
                             <div style="font-weight: 500;">${p.title}</div>
-                            <div style="font-size: 0.75rem; color: var(--text-muted);">${p.action}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">${p.action} &bull; ${new Date(p.date).toLocaleDateString()}</div>
                         </div>
                     </div>
+                    <i class="fa-solid fa-chevron-right" style="color: var(--text-muted); font-size: 0.8rem;"></i>
                 `;
                 list.appendChild(item);
             });
         }
 
-        // --- OCR LOGIC ---
+        // --- OCR LOGIC (FIXED SYNTAX FOR TESSERACT.JS V5) ---
         function setupDragDrop() {
             const dropZone = document.getElementById('dropZone');
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -1026,11 +891,10 @@
             dropZone.addEventListener('drop', handleDrop, false);
             function handleDrop(e) {
                 const dt = e.dataTransfer;
-                const files = dt.files;
-                if(files.length) {
+                if(dt.files.length) {
                     const input = document.getElementById('ocrInput');
                     const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(files[0]);
+                    dataTransfer.items.add(dt.files[0]);
                     input.files = dataTransfer.files;
                     handleOCRUpload(input);
                 }
@@ -1047,6 +911,8 @@
                 img.style.display = 'block';
                 document.getElementById('dropPlaceholder').style.display = 'none';
                 document.getElementById('ocrActions').style.display = 'flex';
+                document.getElementById('ocrStatus').textContent = 'Image loaded. Ready to extract.';
+                document.getElementById('ocrStatus').style.color = 'var(--text-muted)';
                 state.ocrImage = e.target.result;
             };
             reader.readAsDataURL(file);
@@ -1060,6 +926,7 @@
             document.getElementById('ocrActions').style.display = 'none';
             document.getElementById('ocrProgress').style.display = 'none';
             document.getElementById('ocrStatus').textContent = '';
+            document.getElementById('ocrFill').style.width = '0%';
             state.ocrImage = null;
         }
 
@@ -1068,36 +935,52 @@
             const statusEl = document.getElementById('ocrStatus');
             const progressContainer = document.getElementById('ocrProgress');
             const progressFill = document.getElementById('ocrFill');
+            const btnExtract = document.getElementById('btnExtract');
             
             progressContainer.style.display = 'block';
-            statusEl.textContent = "Initializing OCR Engine...";
+            statusEl.style.color = "var(--primary)";
+            statusEl.textContent = "Loading Tesseract Engine...";
+            btnExtract.disabled = true;
 
             try {
-                const worker = await Tesseract.createWorker('eng', 1, {
+                // Correct syntax for Tesseract.js v5
+                const worker = await Tesseract.createWorker("eng", 1, {
                     logger: m => {
                         if (m.status === 'recognizing text') {
-                            progressFill.style.width = `${Math.round(m.progress * 100)}%`;
-                            statusEl.textContent = `Scanning: ${Math.round(m.progress * 100)}%`;
+                            const pct = Math.round(m.progress * 100);
+                            progressFill.style.width = `${pct}%`;
+                            statusEl.textContent = `Scanning Image: ${pct}%`;
                         } else {
-                            statusEl.textContent = m.status;
+                            statusEl.textContent = `Initializing: ${m.status}...`;
                         }
                     }
                 });
 
+                statusEl.textContent = "Extracting text... please wait.";
                 const { data: { text } } = await worker.recognize(state.ocrImage);
                 await worker.terminate();
 
+                if(!text || text.trim() === '') {
+                    throw new Error("No readable text found in image.");
+                }
+
                 const formattedText = text.replace(/\n/g, '<br>');
-                document.getElementById('editor-paper').innerHTML += `<br><hr><h3>Scan Result</h3><p>${formattedText}</p>`;
+                const paper = document.getElementById('editor-paper');
                 
-                showToast("Text extracted!");
+                paper.innerHTML += `<br><br><hr><h3 style="color:var(--primary);">Scanned Text Result:</h3><p>${formattedText}</p>`;
+                
+                addToHistory("Image Scan", "OCR Extraction");
+                showToast("Text extracted successfully!");
                 navigate('editor');
                 resetOCR();
 
             } catch (err) {
-                console.error(err);
-                statusEl.textContent = "Error during OCR.";
+                console.error("OCR Error:", err);
+                statusEl.textContent = "Error: " + (err.message || "Failed to process image.");
                 statusEl.style.color = "var(--danger)";
+                progressFill.style.background = "var(--danger)";
+            } finally {
+                btnExtract.disabled = false;
             }
         }
 
@@ -1108,9 +991,7 @@
             document.getElementById('exportFilename').value = title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
         }
 
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('open');
-        }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
         function simulateCloud(provider) {
             const btn = event.currentTarget;
@@ -1120,7 +1001,7 @@
                 btn.innerHTML = icon;
                 showToast(`Saved to ${provider} (Simulated)`);
                 const filename = document.getElementById('exportFilename').value || 'document';
-                addToHistory(filename, `Cloud (${provider})`);
+                addToHistory(filename, `Cloud Sync (${provider})`);
             }, 1500);
         }
 
@@ -1132,4 +1013,4 @@
         }
     </script>
 </body>
-  </html>
+</html>
