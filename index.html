@@ -375,6 +375,8 @@
                         <button class="btn-ghost" style="padding: 4px 10px; font-size: 0.8rem; border:none;" onclick="showDocumentStats()" title="Document Stats"><i class="fa-solid fa-chart-pie"></i> Stats</button>
                         <button class="btn-ghost" style="padding: 4px 10px; font-size: 0.8rem; border:none;" onclick="toggleZenMode()"><i class="fa-solid fa-eye"></i> Focus</button>
                         <button class="btn-ghost" style="padding: 4px 10px; font-size: 0.8rem; border:none;" onclick="saveDraft()"><i class="fa-solid fa-check"></i> Save</button>
+                        <!-- NEWLY ADDED EXPORT BUTTON -->
+                        <button class="btn-ghost" style="padding: 4px 10px; font-size: 0.8rem; border:none;" onclick="document.getElementById('exportModal').classList.add('open')" title="Export Document"><i class="fa-solid fa-download"></i> Export</button>
                     </div>
                 </div>
 
@@ -491,7 +493,6 @@
                 <label style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">AUTHOR PROFILE</label>
                 <input type="text" id="profileNameInput" class="form-input" placeholder="Your Name" style="margin-bottom: 0.5rem;">
                 
-                <!-- Fixed: Theme select now instantly changes theme for live preview -->
                 <select id="themeSelect" class="form-select" onchange="document.body.setAttribute('data-theme', this.value)">
                     <option value="light">E-Ink Paper (Light)</option>
                     <option value="dark">OLED (Dark)</option>
@@ -625,7 +626,6 @@
         function openProfileModal() { updateProfileUI(); document.getElementById('profileModal').classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
         
-        // Fix: Reverts Theme if user closes without saving
         function closeProfileModal() {
             document.body.setAttribute('data-theme', state.user.theme);
             document.getElementById('themeSelect').value = state.user.theme;
@@ -715,7 +715,6 @@
             const content = editor.innerHTML;
             await localforage.setItem('draft', content); 
             
-            // Fix: Actually save physical files to Vault when clicking "Save" manually
             if(!silent) {
                 let docTitle = "Untitled Document";
                 const h1 = editor.querySelector('h1');
@@ -853,7 +852,6 @@
             try {
                 await html2pdf().set({ margin: 15, filename: filename+'.pdf', html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(printCon).save();
                 
-                // Fix: Vault strictly stores the document upon Export so it's accessible
                 await addHistory(filename, 'PDF Export', editor.innerHTML); 
                 updateStat('exports'); 
                 islandNotify("PDF Downloaded & Saved to Vault", "success");
@@ -872,13 +870,12 @@
             a.click();
             URL.revokeObjectURL(a.href);
             
-            // Fix: Vault strictly stores the document upon Export so it's accessible
             await addHistory(filename, 'TXT Export', editor.innerHTML); 
             updateStat('exports'); 
             islandNotify("Text File Downloaded & Saved to Vault", "success");
         }
 
-        // --- HISTORY VAULT (Now equipped with full Content Storage and Loading) ---
+        // --- HISTORY VAULT ---
         async function addHistory(title, action, content = null) {
             state.projects.unshift({ id: Date.now(), title, action, date: new Date().toISOString(), content });
             if(state.projects.length > 50) state.projects = state.projects.slice(0, 50);
@@ -904,7 +901,6 @@
             if(!state.projects.length) { list.innerHTML = `<p style="color:var(--text-muted);">Vault is empty.</p>`; return; }
             state.projects.forEach(p => {
                 const hasContent = !!p.content;
-                // Add an "Open" button exclusively to vault elements holding saved content
                 const openBtn = hasContent ? `<button class="btn-ghost" style="padding:6px 12px; font-size:0.8rem; border:1px solid var(--border);" onclick="loadVaultDoc(${p.id})"><i class="fa-solid fa-folder-open"></i> Open</button>` : '';
                 
                 list.innerHTML += `<div style="padding:1rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
