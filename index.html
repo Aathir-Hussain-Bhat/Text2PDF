@@ -18,6 +18,10 @@
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <!-- PDF Manipulation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
     <style>
         /* --- PREMIUM MINIMALIST THEMING --- */
@@ -38,6 +42,7 @@
             --font-ui: 'Manrope', sans-serif;
             --font-doc: 'Lora', serif;
             --font-mono: 'JetBrains Mono', monospace;
+            --gold: #f59e0b;
         }
 
         [data-theme="dark"] {
@@ -81,7 +86,6 @@
             display: flex; flex-direction: column; padding: 2rem 1.5rem; gap: 0.5rem; transition: 0.3s;
         }
         
-        /* Symmetrical Sidebar Blocks (Profile & Creator Wall) */
         .sidebar-block {
             display: flex; align-items: center; gap: 1rem; padding: 0.8rem; border-radius: 12px;
             cursor: pointer; transition: all 0.2s; border: 1px solid transparent; margin-bottom: 1.5rem;
@@ -94,10 +98,10 @@
             display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; flex-shrink: 0;
             transition: transform 0.3s;
         }
-        .avatar.gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
+        .avatar.gold { background: linear-gradient(135deg, var(--gold), #d97706); color: #fff; }
         [data-theme="hacker"] .avatar { background: #003300; border: 1px solid #00ff00; color: #00ff00; }
         
-        .user-info { display: flex; flex-direction: column; overflow: hidden; }
+        .user-info { display: flex; flex-direction: column; overflow: hidden; width: 100%; }
         .user-info span { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
         .user-info strong { font-size: 0.95rem; color: var(--text-main); font-weight: 600; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
 
@@ -119,6 +123,8 @@
         .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: 0.2s; border: none; font-family: var(--font-ui); }
         .btn-primary { background: var(--accent); color: var(--bg-app); }
         .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        .btn-gold { background: linear-gradient(135deg, var(--gold), #d97706); color: white; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2); }
+        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4); }
         .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
         .btn-ghost:hover { background: var(--bg-paper); color: var(--text-main); }
 
@@ -152,6 +158,24 @@
         .template-card strong { font-size: 0.95rem; color: var(--text-main); }
         .template-card span { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
         .template-card::after { content:''; position:absolute; top: 45px; right: 20px; width: 40px; height: 2px; background: var(--border); box-shadow: 0 8px 0 var(--border), 0 16px 0 var(--border); opacity: 0.5;}
+
+        /* --- NOTES CARD STYLES --- */
+        .note-card {
+            background: var(--bg-paper);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-box);
+            padding: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .note-card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: var(--shadow-float); }
+        .note-text { white-space: pre-wrap; font-size: 0.95rem; line-height: 1.5; color: var(--text-main); margin-bottom: 1rem; flex-grow: 1; word-break: break-word;}
+        .note-meta { font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 0.5rem;}
+        .note-del { color: #ef4444; cursor: pointer; opacity: 0.5; transition: 0.2s; }
+        .note-del:hover { opacity: 1; }
 
         /* --- NOTION-STYLE EDITOR --- */
         .editor-container { max-width: 800px; width: 100%; margin: 0 auto; padding-bottom: 10rem; position: relative; }
@@ -239,7 +263,7 @@
         .social-pill { display: inline-flex; align-items: center; gap: 8px; background: var(--bg-app); border: 1px solid var(--border); padding: 8px 16px; border-radius: 50px; font-size: 0.8rem; font-weight: 600; margin-top: 1rem; color: var(--text-main); text-decoration: none; transition: 0.2s;}
         .social-pill:hover { background: var(--accent); color: var(--bg-app); }
 
-        /* Mobile Nav & Mobile Specific Adjustments */
+        /* Mobile Nav */
         .mobile-nav { 
             display: none; position: fixed; bottom: 0; width: 100%; 
             background: var(--bg-paper); border-top: 1px solid var(--border); 
@@ -260,7 +284,7 @@
             .dashboard-header h1 { font-size: 1.8rem; margin-top: 0.2rem; }
             .modal { padding: 1.5rem; width: 95%; }
             .cmd-palette { width: 90%; }
-            .editor-metrics { display: none; } /* Hidden on mobile to save space */
+            .editor-metrics { display: none; }
         }
 
         /* PDF Helper */
@@ -300,8 +324,15 @@
         <div class="nav-item active" onclick="navigate('home')"><i class="fa-solid fa-house"></i> Dashboard</div>
         <div class="nav-item" onclick="navigate('editor')"><i class="fa-solid fa-pen-nib"></i> Editor</div>
         <div class="nav-item" onclick="navigate('ocr')"><i class="fa-solid fa-camera"></i> Smart Scan</div>
+        <div class="nav-item" onclick="navigate('tools')"><i class="fa-solid fa-toolbox"></i> PDF Tools</div>
+        <div class="nav-item" onclick="navigate('notes')"><i class="fa-solid fa-note-sticky"></i> Quick Notes</div>
         <div class="nav-item" onclick="navigate('history')"><i class="fa-solid fa-folder-open"></i> Vault</div>
         
+        <!-- MONETIZATION: BUY ME A COFFEE BUTTON -->
+        <div class="nav-item" onclick="window.open('https://buymeacoffee.com', '_blank')" style="margin-top: 1rem; background: rgba(245, 158, 11, 0.1); border: 1px solid var(--gold); color: var(--gold);">
+            <i class="fa-solid fa-mug-hot"></i> Buy me a coffee
+        </div>
+
         <!-- BOTTOM LEFT: Creator Wall Aligned -->
         <div class="sidebar-block bottom" onclick="openCreatorModal()">
             <div class="avatar gold"><i class="fa-solid fa-crown" style="font-size: 0.9rem;"></i></div>
@@ -323,8 +354,11 @@
                         <p style="color: var(--text-muted); font-weight: 600; margin-bottom: 0;">OVERVIEW</p>
                         <h1 style="margin-top: 0;">Welcome, <span id="userNameDisplay">Writer</span>.</h1>
                     </div>
-                    <!-- MOBILE QUICK ACCESS CLUSTER (Visible only on mobile) -->
+                    <!-- MOBILE QUICK ACCESS CLUSTER -->
                     <div class="mobile-header-actions">
+                        <div class="avatar" style="width: 36px; height: 36px; cursor: pointer; font-size: 0.9rem; background: rgba(245, 158, 11, 0.1); color: var(--gold); border: 1px solid var(--gold);" onclick="window.open('https://buymeacoffee.com', '_blank')" title="Buy me a coffee">
+                            <i class="fa-solid fa-mug-hot"></i>
+                        </div>
                         <div class="avatar gold" style="width: 36px; height: 36px; cursor: pointer; font-size: 0.9rem;" onclick="openCreatorModal()" title="Creator Wall">
                             <i class="fa-solid fa-crown"></i>
                         </div>
@@ -372,6 +406,9 @@
                     <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); letter-spacing: 0.5px;">PRESS CMD+K FOR TOOLS</span>
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <div id="autoSaveIndicator" style="width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: 0.3s;" title="Auto-Save Status"></div>
+                        <button class="btn-ghost" id="btnListen" style="padding: 4px 10px; font-size: 0.8rem; border:none;" onclick="toggleSpeech()" title="Read Aloud"><i class="fa-solid fa-volume-high"></i> Listen</button>
+                        <button class="btn-ghost" id="btnPomodoro" style="padding: 4px 10px; font-size: 0.8rem; border:none;" onclick="togglePomodoro()" title="Focus Timer"><i class="fa-solid fa-clock"></i> 25:00</button>
+                        
                         <button class="btn-ghost" style="padding: 4px 10px; font-size: 0.8rem; border:none;" onclick="showDocumentStats()" title="Document Stats"><i class="fa-solid fa-chart-pie"></i> Stats</button>
                         <button class="btn-ghost" style="padding: 4px 10px; font-size: 0.8rem; border:none;" onclick="toggleZenMode()"><i class="fa-solid fa-eye"></i> Focus</button>
                         <button class="btn-ghost" style="padding: 4px 10px; font-size: 0.8rem; border:none;" onclick="saveDraft()"><i class="fa-solid fa-check"></i> Save</button>
@@ -388,7 +425,7 @@
                     <button class="ft-btn" onclick="formatDoc('insertUnorderedList')"><i class="fa-solid fa-list"></i></button>
                 </div>
 
-                <div id="editor-paper" class="paper" contenteditable="true" placeholder="Start writing...">
+                <div id="editor-paper" class="paper" contenteditable="true" placeholder="Start writing or drag an image here...">
                     <h1>Untitled</h1><p>Start here...</p>
                 </div>
             </div>
@@ -415,6 +452,109 @@
             </div>
         </div>
 
+        <!-- FULL PDF TOOLS WORKSPACE -->
+        <div id="view-tools" class="view">
+            <div class="dashboard-container">
+                <div class="dashboard-header">
+                    <div>
+                        <h1 style="margin-top: 0; letter-spacing: -1px;">PDF Tools</h1>
+                        <p style="color: var(--text-muted); margin-bottom: 2rem;">Powerful utilities. Processed locally.</p>
+                    </div>
+                </div>
+                
+                <!-- Organization -->
+                <div class="section-title" style="margin-top:0;"><span>Organization</span></div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+                    <div class="template-card" onclick="document.getElementById('tool-merge-pdf').click()">
+                        <i class="fa-solid fa-layer-group"></i><strong>Merge PDFs</strong><span>Combine multiple files</span>
+                        <input type="file" id="tool-merge-pdf" accept=".pdf" multiple style="display:none" onchange="toolMergePDF(this)">
+                    </div>
+                    <div class="template-card" onclick="document.getElementById('tool-split-pdf').click()">
+                        <i class="fa-solid fa-arrows-split-up-and-left"></i><strong>Split PDF</strong><span>Divide by page number</span>
+                        <input type="file" id="tool-split-pdf" accept=".pdf" style="display:none" onchange="toolSplitPDF(this)">
+                    </div>
+                    <div class="template-card" onclick="document.getElementById('tool-remove-pages').click()">
+                        <i class="fa-solid fa-file-circle-minus"></i><strong>Remove Pages</strong><span>Delete specific pages</span>
+                        <input type="file" id="tool-remove-pages" accept=".pdf" style="display:none" onchange="toolRemovePages(this)">
+                    </div>
+                    <div class="template-card" onclick="document.getElementById('tool-extract-pages').click()">
+                        <i class="fa-solid fa-file-export"></i><strong>Extract Pages</strong><span>Save specific pages</span>
+                        <input type="file" id="tool-extract-pages" accept=".pdf" style="display:none" onchange="toolExtractPages(this)">
+                    </div>
+                </div>
+
+                <!-- Optimization -->
+                <div class="section-title" style="margin-top:0;"><span>Optimization</span></div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+                    <div class="template-card" onclick="document.getElementById('tool-compress-pdf').click()">
+                        <i class="fa-solid fa-minimize"></i><strong>Compress PDF</strong><span>Reduce structural bloat</span>
+                        <input type="file" id="tool-compress-pdf" accept=".pdf" style="display:none" onchange="toolCompressPDF(this)">
+                    </div>
+                </div>
+
+                <!-- Conversion -->
+                <div class="section-title" style="margin-top:0;"><span>Conversion</span></div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+                    <div class="template-card" onclick="document.getElementById('tool-img-pdf').click()">
+                        <i class="fa-regular fa-images"></i><strong>Image to PDF</strong><span>JPG/PNG to PDF</span>
+                        <input type="file" id="tool-img-pdf" accept="image/png, image/jpeg" multiple style="display:none" onchange="toolImageToPDF(this)">
+                    </div>
+                    <div class="template-card" onclick="document.getElementById('tool-txt-pdf').click()">
+                        <i class="fa-solid fa-file-lines"></i><strong>TXT to Editor</strong><span>Import text files</span>
+                        <input type="file" id="tool-txt-pdf" accept=".txt" style="display:none" onchange="toolTxtToEditor(this)">
+                    </div>
+                    <div class="template-card" onclick="document.getElementById('tool-pdf-jpg').click()">
+                        <i class="fa-solid fa-image"></i><strong>PDF to JPG</strong><span>Convert 1st page to image</span>
+                        <input type="file" id="tool-pdf-jpg" accept=".pdf" style="display:none" onchange="toolPdfToJpg(this)">
+                    </div>
+                    <div class="template-card" onclick="showOfflineAlert('Word/Excel to PDF')">
+                        <i class="fa-solid fa-file-word"></i><strong>Office to PDF</strong><span>Convert Office Docs</span>
+                    </div>
+                </div>
+
+                <!-- Editing & Security -->
+                <div class="section-title" style="margin-top:0;"><span>Editing & Security</span></div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+                    <div class="template-card" onclick="document.getElementById('tool-add-numbers').click()">
+                        <i class="fa-solid fa-list-ol"></i><strong>Add Page Numbers</strong><span>Stamp numbers on PDF</span>
+                        <input type="file" id="tool-add-numbers" accept=".pdf" style="display:none" onchange="toolAddPageNumbers(this)">
+                    </div>
+                    <div class="template-card" onclick="document.getElementById('tool-edit-pdf').click()">
+                        <i class="fa-solid fa-file-pen"></i><strong>Edit PDF (Text)</strong><span>Extract to Editor</span>
+                        <input type="file" id="tool-edit-pdf" accept=".pdf" style="display:none" onchange="toolEditPDF(this)">
+                    </div>
+                    <div class="template-card" onclick="showOfflineAlert('Password Protect')">
+                        <i class="fa-solid fa-lock"></i><strong>Protect PDF</strong><span>Add Password</span>
+                    </div>
+                    <div class="template-card" onclick="showOfflineAlert('Repair PDF')">
+                        <i class="fa-solid fa-wrench"></i><strong>Repair PDF</strong><span>Fix corrupt files</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUICK NOTES WORKSPACE -->
+        <div id="view-notes" class="view">
+            <div class="dashboard-container">
+                <div class="dashboard-header">
+                    <div>
+                        <h1 style="margin-top: 0; letter-spacing: -1px;">Quick Notes</h1>
+                        <p style="color: var(--text-muted); margin-bottom: 2rem;">Capture thoughts instantly.</p>
+                    </div>
+                </div>
+                
+                <div style="background: var(--bg-paper); border: 1px solid var(--border); border-radius: var(--radius-box); padding: 1.5rem; margin-bottom: 2rem; box-shadow: var(--shadow-soft);">
+                    <textarea id="newNoteText" placeholder="Write a note..." style="width: 100%; min-height: 100px; background: transparent; border: none; outline: none; color: var(--text-main); font-family: var(--font-ui); font-size: 1rem; resize: vertical; margin-bottom: 1rem;"></textarea>
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button class="btn btn-primary" onclick="addNote()"><i class="fa-solid fa-check"></i> Save Note</button>
+                    </div>
+                </div>
+
+                <div id="notes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
+                </div>
+            </div>
+        </div>
+
         <!-- HISTORY -->
         <div id="view-history" class="view">
             <div style="max-width: 600px; width: 100%; margin: 0 auto; margin-top: 2rem;">
@@ -432,6 +572,8 @@
         <i class="fa-solid fa-house active" onclick="navigate('home')" aria-label="Home" title="Home Dashboard"></i>
         <i class="fa-solid fa-pen-nib" onclick="navigate('editor')" aria-label="Editor" title="Text Editor"></i>
         <i class="fa-solid fa-camera" onclick="navigate('ocr')" aria-label="Smart Scan" title="AI Image Scanner"></i>
+        <i class="fa-solid fa-toolbox" onclick="navigate('tools')" aria-label="Tools" title="PDF Tools"></i>
+        <i class="fa-solid fa-note-sticky" onclick="navigate('notes')" aria-label="Notes" title="Quick Notes"></i>
         <i class="fa-solid fa-folder-open" onclick="navigate('history')" aria-label="Vault" title="Vault History"></i>
         <i class="fa-solid fa-magnifying-glass" onclick="toggleCmdPalette()" aria-label="Search Palette" title="Search Tools"></i>
     </div>
@@ -440,30 +582,13 @@
     <div class="modal-overlay" id="statsModal">
         <div class="modal">
             <h2 style="margin-top:0; letter-spacing:-0.5px;"><i class="fa-solid fa-chart-pie" style="color:var(--text-muted);"></i> Document Stats</h2>
-            
             <div style="background: var(--bg-app); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
-                    <span style="font-weight: 600; color: var(--text-muted);">Words</span>
-                    <strong style="font-size: 1.2rem; color: var(--text-main);" id="statModalWords">0</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
-                    <span style="font-weight: 600; color: var(--text-muted);">Sentences</span>
-                    <strong style="font-size: 1.2rem; color: var(--text-main);" id="statModalSentences">0</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
-                    <span style="font-weight: 600; color: var(--text-muted);">Lines</span>
-                    <strong style="font-size: 1.2rem; color: var(--text-main);" id="statModalLines">0</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
-                    <span style="font-weight: 600; color: var(--text-muted);">Characters</span>
-                    <strong style="font-size: 1.2rem; color: var(--text-main);" id="statModalChars">0</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-weight: 600; color: var(--text-muted);">Est. Reading Time</span>
-                    <strong style="font-size: 1.2rem; color: var(--text-main);" id="statModalReadTime">0 min</strong>
-                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;"><span style="font-weight: 600; color: var(--text-muted);">Words</span><strong style="font-size: 1.2rem; color: var(--text-main);" id="statModalWords">0</strong></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;"><span style="font-weight: 600; color: var(--text-muted);">Sentences</span><strong style="font-size: 1.2rem; color: var(--text-main);" id="statModalSentences">0</strong></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;"><span style="font-weight: 600; color: var(--text-muted);">Lines</span><strong style="font-size: 1.2rem; color: var(--text-main);" id="statModalLines">0</strong></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;"><span style="font-weight: 600; color: var(--text-muted);">Characters</span><strong style="font-size: 1.2rem; color: var(--text-main);" id="statModalChars">0</strong></div>
+                <div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 600; color: var(--text-muted);">Est. Reading Time</span><strong style="font-size: 1.2rem; color: var(--text-main);" id="statModalReadTime">0 min</strong></div>
             </div>
-
             <button class="btn btn-primary" onclick="closeModal('statsModal')" style="width: 100%; padding: 1rem;">Done</button>
         </div>
     </div>
@@ -472,6 +597,7 @@
     <div class="modal-overlay" id="exportModal">
         <div class="modal">
             <h2 style="margin-top:0; letter-spacing:-0.5px;">Export Document</h2>
+            
             <label style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">FILENAME</label>
             <input type="text" id="exportFilename" class="form-input" value="Document">
             <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; cursor: pointer; font-size: 0.9rem; font-weight: 500;">
@@ -515,10 +641,15 @@
             <div style="margin-bottom: 1.5rem; background: var(--bg-app); border-radius: 12px; padding: 1rem; display: flex; justify-content: space-around; text-align: center;">
                 <div><div style="font-size: 1.2rem; font-weight: 700; color: var(--accent);" id="statExports">0</div><div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Exports</div></div>
                 <div><div style="font-size: 1.2rem; font-weight: 700; color: var(--accent);" id="statScans">0</div><div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">AI Scans</div></div>
+                <div><div style="font-size: 1.2rem; font-weight: 700; color: var(--accent);" id="statTools">0</div><div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">PDF Tools</div></div>
             </div>
 
-            <button class="btn btn-primary" onclick="saveProfile()" style="width: 100%; padding: 1rem;">Save Settings</button>
-            <button class="btn-ghost" onclick="closeProfileModal()" style="width: 100%; padding: 1rem; border:none; margin-top:0.5rem;">Close</button>
+            <button class="btn" onclick="window.open('https://buymeacoffee.com', '_blank')" style="width: 100%; padding: 1rem; margin-bottom: 0.5rem; background: rgba(245, 158, 11, 0.1); border: 1px solid var(--gold); color: var(--gold);">
+                <i class="fa-solid fa-mug-hot"></i> Buy me a coffee
+            </button>
+
+            <button class="btn btn-primary" onclick="saveProfile()" style="width: 100%; padding: 1rem; margin-bottom: 0.5rem;">Save Settings</button>
+            <button class="btn-ghost" onclick="closeProfileModal()" style="width: 100%; padding: 1rem; border:none;">Close</button>
         </div>
     </div>
 
@@ -539,40 +670,54 @@
                 This app runs 100% locally. Your text, PDFs, and AI scans never touch a server. Built for ultimate privacy and focus.
             </div>
 
-            <!-- LINKS UPDATED HERE -->
             <a href="https://github.com/Aathir-Hussain-Bhat" target="_blank" rel="noopener noreferrer" class="social-pill" onclick="islandNotify('Opening GitHub...', 'loading')"><i class="fa-brands fa-github"></i> GitHub</a>
             <a href="https://youtube.com/@aathir_hussain_bhat.?si=w5F79fRoIpcvO5FF" target="_blank" rel="noopener noreferrer" class="social-pill" onclick="islandNotify('Opening YouTube...', 'loading')"><i class="fa-brands fa-youtube"></i> Follow</a>
+            <a href="https://buymeacoffee.com" target="_blank" rel="noopener noreferrer" class="social-pill" style="border-color: var(--gold); color: var(--gold);" onclick="islandNotify('Opening...', 'loading')"><i class="fa-solid fa-mug-hot"></i> Support</a>
         </div>
     </div>
 
     <div id="print-container"></div>
 
     <script>
+        // Configuration for PDF.js Web Worker
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
         // --- CORE STATE & INIT ---
         const state = { 
-            user: { name: 'Writer', theme: 'light', autoSave: true, sound: true }, 
-            stats: { exports: 0, scans: 0 },
-            projects: [], ocrImage: null, zenMode: false 
+            userPrefs: { name: 'Writer', theme: 'light', autoSave: true, sound: true }, 
+            stats: { exports: 0, scans: 0, toolsUsed: 0 },
+            projects: [], notes: [], ocrImage: null, zenMode: false
         };
         let audioCtx = null, easterEggClicks = 0, autoSaveInterval = null;
+
+        // Pomodoro State
+        let pomoInterval = null; let pomoTime = 1500; let isPomoActive = false;
+        // TTS State
+        let isSpeaking = false; const synth = window.speechSynthesis;
 
         window.addEventListener('load', async () => {
             localforage.config({ name: 'TextPDF_Pro', storeName: 'vault' });
             
             const savedUser = await localforage.getItem('userPrefs');
-            if (savedUser) state.user = { ...state.user, ...savedUser };
+            if (savedUser) state.userPrefs = { ...state.userPrefs, ...savedUser };
             
             const savedStats = await localforage.getItem('appStats');
-            if (savedStats) state.stats = savedStats;
-            
-            updateProfileUI(); applyTheme(state.user.theme); setupAutoSave();
+            if (savedStats) state.stats = { ...state.stats, ...savedStats };
+
+            updateProfileUI(); applyTheme(state.userPrefs.theme); setupAutoSave();
             
             const savedProjects = await localforage.getItem('history');
             state.projects = savedProjects || [];
+            
+            const savedNotes = await localforage.getItem('notes');
+            state.notes = savedNotes || [];
+            
             const draft = await localforage.getItem('draft');
             if (draft) document.getElementById('editor-paper').innerHTML = draft;
 
             setupDragDrop(); loadRecentProjects(); setupFloatingToolbar(); setupMetrics(); setupCreator3D();
+            renderNotes();
+            setupEditorMarkdownAndImages();
         });
 
         // --- DYNAMIC ISLAND ---
@@ -593,13 +738,15 @@
             document.getElementById(`view-${viewId}`).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.mobile-nav i').forEach(el => el.classList.remove('active'));
-            const idx = ['home', 'editor', 'ocr', 'history'].indexOf(viewId);
+            
+            const idx = ['home', 'editor', 'ocr', 'tools', 'notes', 'history'].indexOf(viewId);
             if(idx >= 0) {
                 if(document.querySelectorAll('.nav-item')[idx]) document.querySelectorAll('.nav-item')[idx].classList.add('active');
                 if(document.querySelectorAll('.mobile-nav i')[idx]) document.querySelectorAll('.mobile-nav i')[idx].classList.add('active');
             }
             if (viewId === 'history') renderHistory();
             if (viewId === 'home') loadRecentProjects();
+            if (viewId === 'notes') renderNotes();
         }
 
         function updateProfileUI() {
@@ -609,43 +756,48 @@
             else if (hour < 18) greeting = "Good afternoon,";
 
             document.getElementById('sidebarGreeting').innerText = greeting;
-            document.getElementById('sidebarName').innerText = state.user.name;
-            document.getElementById('userNameDisplay').innerText = state.user.name;
-            document.getElementById('sidebarAvatar').innerText = state.user.name.charAt(0).toUpperCase();
-            document.getElementById('homeAvatar').innerText = state.user.name.charAt(0).toUpperCase();
-            
-            document.getElementById('profileNameInput').value = state.user.name;
-            document.getElementById('themeSelect').value = state.user.theme;
-            document.getElementById('toggleAutoSave').checked = state.user.autoSave;
-            document.getElementById('toggleSound').checked = state.user.sound;
+            document.getElementById('sidebarName').innerText = state.userPrefs.name;
+            document.getElementById('sidebarAvatar').innerText = state.userPrefs.name.charAt(0).toUpperCase();
+            document.getElementById('homeAvatar').innerText = state.userPrefs.name.charAt(0).toUpperCase();
+
+            document.getElementById('userNameDisplay').innerText = state.userPrefs.name;
+            document.getElementById('profileNameInput').value = state.userPrefs.name;
+            document.getElementById('themeSelect').value = state.userPrefs.theme;
+            document.getElementById('toggleAutoSave').checked = state.userPrefs.autoSave;
+            document.getElementById('toggleSound').checked = state.userPrefs.sound;
             
             document.getElementById('statExports').innerText = state.stats.exports;
             document.getElementById('statScans').innerText = state.stats.scans;
+            document.getElementById('statTools').innerText = state.stats.toolsUsed || 0;
         }
 
         function openProfileModal() { updateProfileUI(); document.getElementById('profileModal').classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
         
         function closeProfileModal() {
-            document.body.setAttribute('data-theme', state.user.theme);
-            document.getElementById('themeSelect').value = state.user.theme;
+            document.body.setAttribute('data-theme', state.userPrefs.theme);
+            document.getElementById('themeSelect').value = state.userPrefs.theme;
             closeModal('profileModal');
         }
 
         async function saveProfile() {
-            state.user.name = document.getElementById('profileNameInput').value || 'Writer';
+            state.userPrefs.name = document.getElementById('profileNameInput').value || 'Writer';
             const newTheme = document.getElementById('themeSelect').value;
-            state.user.autoSave = document.getElementById('toggleAutoSave').checked;
-            state.user.sound = document.getElementById('toggleSound').checked;
+            state.userPrefs.autoSave = document.getElementById('toggleAutoSave').checked;
+            state.userPrefs.sound = document.getElementById('toggleSound').checked;
             
             applyTheme(newTheme); updateProfileUI(); setupAutoSave();
-            await localforage.setItem('userPrefs', state.user);
+            await localforage.setItem('userPrefs', state.userPrefs);
             closeModal('profileModal'); islandNotify("Settings Saved", "success");
         }
 
         function applyTheme(theme) {
             document.body.setAttribute('data-theme', theme);
-            state.user.theme = theme;
+            state.userPrefs.theme = theme;
+        }
+
+        function showOfflineAlert(featureName) {
+            islandNotify(`${featureName} requires Cloud Backend. (Offline Mode Active)`, "error", 4000);
         }
 
         // --- CREATOR WALL & EASTER EGG ---
@@ -670,15 +822,15 @@
             if(easterEggClicks >= 5) {
                 easterEggClicks = 0; confetti({ particleCount: 200, spread: 120, origin: { y: 0.5 }, colors: ['#00ff00', '#ffffff'] });
                 applyTheme('hacker'); document.getElementById('themeSelect').value = 'hacker'; 
-                state.user.theme = 'hacker'; localforage.setItem('userPrefs', state.user);
+                state.userPrefs.theme = 'hacker'; localforage.setItem('userPrefs', state.userPrefs);
                 islandNotify("Matrix Unlocked. Welcome.", "success");
             }
         });
 
-        // --- TEMPLATES (Click to Use) ---
+        // --- TEMPLATES ---
         function useTemplate(type) {
             const paper = document.getElementById('editor-paper');
-            const d = new Date().toLocaleDateString(); const n = state.user.name;
+            const d = new Date().toLocaleDateString(); const n = state.userPrefs.name;
             let html = '';
             switch(type) {
                 case 'blank': html = `<h1>Untitled</h1><p>Start writing...</p>`; break;
@@ -692,7 +844,7 @@
             paper.innerHTML = html; updateMetrics(); navigate('editor'); islandNotify("Template Applied", "success");
         }
 
-        // --- EDITOR, AUTOSAVE, & METRICS ---
+        // --- EDITOR, AUTOSAVE, MARKDOWN & IMAGES ---
         const editor = document.getElementById('editor-paper');
         const fToolbar = document.getElementById('floatingToolbar');
 
@@ -724,13 +876,13 @@
             
             setTimeout(() => {
                 indicator.style.background = 'var(--border)';
-                if(!silent) islandNotify("Saved to Vault", "success");
+                if(!silent) islandNotify("Saved Locally", "success");
             }, 800);
         }
 
         function setupAutoSave() {
             clearInterval(autoSaveInterval);
-            if(state.user.autoSave) {
+            if(state.userPrefs.autoSave) {
                 autoSaveInterval = setInterval(() => saveDraft(true), 30000); // 30 seconds
             }
         }
@@ -772,8 +924,9 @@
             state.zenMode = !state.zenMode;
             document.body.classList.toggle('focus-mode-active', state.zenMode);
             islandNotify(state.zenMode ? "Focus Mode On" : "Focus Mode Off", "info");
-            if(state.zenMode && state.user.sound && !audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
+            if(state.zenMode && state.userPrefs.sound && !audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
         }
+        
         function updateFocusBlock() {
             if(!state.zenMode) return;
             document.querySelectorAll('.focused-block').forEach(el => el.classList.remove('focused-block'));
@@ -786,25 +939,156 @@
                 }
             }
         }
-        editor.addEventListener('keydown', () => {
-            updateFocusBlock();
-            if(!state.zenMode || !audioCtx || !state.user.sound) return;
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.type = 'square'; osc.frequency.setValueAtTime(100, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.03);
-            gain.gain.setValueAtTime(0.02, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.03);
-        });
+
+        // --- NEW: MARKDOWN, IMAGES, POMODORO & TTS ---
+        function setupEditorMarkdownAndImages() {
+            // Typing Sounds & Focus mode update
+            editor.addEventListener('keydown', () => {
+                updateFocusBlock();
+                if(!state.zenMode || !audioCtx || !state.userPrefs.sound) return;
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.type = 'square'; osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.03);
+                gain.gain.setValueAtTime(0.02, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.03);
+            });
+
+            // Notion-Style Markdown Shortcuts
+            editor.addEventListener('keyup', (e) => {
+                if(e.key === ' ' || e.code === 'Space') {
+                    const sel = window.getSelection();
+                    if (!sel.rangeCount) return;
+                    const node = sel.anchorNode;
+                    if (node.nodeType !== 3) return; 
+                    
+                    const text = node.textContent;
+                    if (text === '# ') {
+                        node.textContent = ''; document.execCommand('formatBlock', false, 'H1');
+                    } else if (text === '## ') {
+                        node.textContent = ''; document.execCommand('formatBlock', false, 'H2');
+                    } else if (text === '### ') {
+                        node.textContent = ''; document.execCommand('formatBlock', false, 'H3');
+                    } else if (text === '- ') {
+                        node.textContent = ''; document.execCommand('insertUnorderedList', false, null);
+                    } else if (text === '--- ') {
+                        node.textContent = ''; document.execCommand('insertHorizontalRule', false, null);
+                    }
+                }
+            });
+
+            // Image Paste
+            editor.addEventListener('paste', (e) => {
+                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                for (let index in items) {
+                    const item = items[index];
+                    if (item.kind === 'file' && item.type.startsWith('image/')) {
+                        e.preventDefault();
+                        const blob = item.getAsFile();
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            const imgHtml = `<br><img src="${event.target.result}" style="max-width:100%; border-radius:8px; margin:1rem 0;"><br>`;
+                            document.execCommand('insertHTML', false, imgHtml);
+                            updateMetrics();
+                        };
+                        reader.readAsDataURL(blob);
+                    }
+                }
+            });
+
+            // Image Drop
+            editor.addEventListener('dragover', (e) => e.preventDefault());
+            editor.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const files = e.dataTransfer.files;
+                if(files.length > 0 && files[0].type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const imgHtml = `<br><img src="${event.target.result}" style="max-width:100%; border-radius:8px; margin:1rem 0;"><br>`;
+                        document.execCommand('insertHTML', false, imgHtml);
+                        updateMetrics();
+                    };
+                    reader.readAsDataURL(files[0]);
+                }
+            });
+        }
+
+        // Feature: Proofreader (TTS)
+        function toggleSpeech() {
+            const btn = document.getElementById('btnListen');
+            if (isSpeaking) {
+                synth.cancel();
+                isSpeaking = false;
+                btn.innerHTML = `<i class="fa-solid fa-volume-high"></i> Listen`;
+                islandNotify("Proofreader stopped.", "info");
+            } else {
+                const text = editor.innerText.trim();
+                if(!text) { islandNotify("Nothing to read.", "error"); return; }
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.onend = () => {
+                    isSpeaking = false;
+                    btn.innerHTML = `<i class="fa-solid fa-volume-high"></i> Listen`;
+                };
+                synth.speak(utterance);
+                isSpeaking = true;
+                btn.innerHTML = `<i class="fa-solid fa-stop"></i> Stop`;
+                islandNotify("Proofreader active.", "success");
+            }
+        }
+
+        // Feature: Pomodoro Timer
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+        function playChime() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                gain.gain.setValueAtTime(0.5, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 2);
+                osc.start(); osc.stop(ctx.currentTime + 2);
+            } catch(e){}
+        }
+        function togglePomodoro() {
+            const btn = document.getElementById('btnPomodoro');
+            if (isPomoActive) {
+                clearInterval(pomoInterval);
+                isPomoActive = false; pomoTime = 1500;
+                btn.innerHTML = `<i class="fa-solid fa-clock"></i> 25:00`;
+                islandNotify("Focus timer stopped.", "info");
+            } else {
+                isPomoActive = true;
+                islandNotify("Focus session started!", "success");
+                pomoInterval = setInterval(() => {
+                    pomoTime--;
+                    btn.innerHTML = `<i class="fa-solid fa-clock"></i> ${formatTime(pomoTime)}`;
+                    if (pomoTime <= 0) {
+                        clearInterval(pomoInterval);
+                        isPomoActive = false; pomoTime = 1500;
+                        btn.innerHTML = `<i class="fa-solid fa-clock"></i> 25:00`;
+                        islandNotify("Session complete! Take a break.", "success", 5000);
+                        playChime();
+                    }
+                }, 1000);
+            }
+        }
 
         // --- COMMAND PALETTE ---
         const commands = [
             { t: 'New Blank Canvas', i: 'fa-file', a: () => useTemplate('blank') },
             { t: 'Scan Image (AI OCR)', i: 'fa-camera', a: () => navigate('ocr') },
-            { t: 'Export Document', i: 'fa-download', a: () => { document.getElementById('exportModal').classList.add('open'); } },
+            { t: 'PDF Tools', i: 'fa-toolbox', a: () => navigate('tools') },
+            { t: 'Quick Notes', i: 'fa-note-sticky', a: () => navigate('notes') },
+            { t: 'Start/Stop Pomodoro', i: 'fa-clock', a: togglePomodoro },
+            { t: 'Listen to Document', i: 'fa-volume-high', a: toggleSpeech },
+            { t: 'Export Document', i: 'fa-download', a: () => document.getElementById('exportModal').classList.add('open') },
             { t: 'Document Stats (Words & Lines)', i: 'fa-chart-pie', a: showDocumentStats },
             { t: 'Toggle Focus Mode', i: 'fa-eye', a: toggleZenMode },
-            { t: 'Open Settings', i: 'fa-gear', a: openProfileModal },
+            { t: 'Open Settings', i: 'fa-gear', a: openProfileModal }
         ];
         document.addEventListener('keydown', (e) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); toggleCmdPalette(); } });
         
@@ -829,10 +1113,368 @@
             });
         }
 
-        // --- EXPORT PDF & TXT ---
-        async function updateStat(key) {
-            state.stats[key]++;
+        // --- QUICK NOTES LOGIC ---
+        async function addNote() {
+            const textarea = document.getElementById('newNoteText');
+            const text = textarea.value.trim();
+            if(!text) return;
+            
+            const newNote = { id: Date.now(), text, date: new Date().toISOString() };
+            state.notes.unshift(newNote);
+            await localforage.setItem('notes', state.notes);
+            
+            textarea.value = '';
+            renderNotes();
+            islandNotify("Note Saved", "success");
+        }
+
+        async function deleteNote(id) {
+            state.notes = state.notes.filter(n => n.id !== id);
+            await localforage.setItem('notes', state.notes);
+            renderNotes();
+            islandNotify("Note Deleted", "success");
+        }
+
+        function renderNotes() {
+            const grid = document.getElementById('notes-grid');
+            if(!grid) return;
+            grid.innerHTML = '';
+            if(!state.notes.length) {
+                grid.innerHTML = `<div style="grid-column: 1/-1; color: var(--text-muted); text-align: center; padding: 2rem;">No notes yet. Type above to start capturing your thoughts!</div>`;
+                return;
+            }
+            state.notes.forEach(note => {
+                const safeText = note.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                grid.innerHTML += `
+                    <div class="note-card">
+                        <div class="note-text">${safeText}</div>
+                        <div class="note-meta">
+                            <span>${new Date(note.date).toLocaleDateString()}</span>
+                            <i class="fa-solid fa-trash note-del" onclick="deleteNote(${note.id})" title="Delete Note"></i>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // --- PDF TOOLS ENGINE (Client Side & Offline) ---
+        async function updateToolStat() {
+            state.stats.toolsUsed = (state.stats.toolsUsed || 0) + 1;
             await localforage.setItem('appStats', state.stats);
+        }
+
+        async function updateStat(type) {
+            state.stats[type] = (state.stats[type] || 0) + 1;
+            await localforage.setItem('appStats', state.stats);
+        }
+
+        function downloadBlob(bytes, filename, mimeType) {
+            const blob = new Blob([bytes], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = filename; a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        async function toolSplitPDF(input) {
+            const files = Array.from(input.files);
+            if(!files.length) return;
+
+            const pageStr = prompt("Enter the page number to split after (e.g., 2):");
+            if(!pageStr) { input.value = ''; return; }
+            const splitPage = parseInt(pageStr.trim());
+
+            islandNotify("Splitting PDF...", "loading", 0);
+            try {
+                const PDFDocument = window.PDFLib.PDFDocument;
+                const pdf = await PDFDocument.load(await files[0].arrayBuffer());
+                const totalPages = pdf.getPageCount();
+
+                if(splitPage >= totalPages || splitPage < 1) {
+                    islandNotify("Invalid page number.", "error");
+                    input.value = ''; return;
+                }
+
+                // Create Part 1
+                const pdf1 = await PDFDocument.create();
+                const pages1 = await pdf1.copyPages(pdf, Array.from({length: splitPage}, (_, i) => i));
+                pages1.forEach(p => pdf1.addPage(p));
+                downloadBlob(await pdf1.save(), "Split_Part1.pdf", "application/pdf");
+
+                // Create Part 2
+                const pdf2 = await PDFDocument.create();
+                const pages2 = await pdf2.copyPages(pdf, Array.from({length: totalPages - splitPage}, (_, i) => i + splitPage));
+                pages2.forEach(p => pdf2.addPage(p));
+                downloadBlob(await pdf2.save(), "Split_Part2.pdf", "application/pdf");
+
+                updateToolStat();
+                islandNotify("PDF Split Successfully!", "success");
+            } catch(e) {
+                islandNotify("Split Failed.", "error");
+            }
+            input.value = '';
+        }
+
+        async function toolRemovePages(input) {
+            const files = Array.from(input.files);
+            if(!files.length) return;
+
+            const pageStr = prompt("Enter page numbers to remove (comma separated, e.g., 1, 3):");
+            if(!pageStr) { input.value = ''; return; }
+
+            islandNotify("Removing pages...", "loading", 0);
+            try {
+                const PDFDocument = window.PDFLib.PDFDocument;
+                const pdf = await PDFDocument.load(await files[0].arrayBuffer());
+                
+                // Sort descending so removing doesn't shift indexes of subsequent pages
+                const pagesToRemove = pageStr.split(',').map(n => parseInt(n.trim()) - 1).sort((a,b) => b-a);
+                
+                for(let p of pagesToRemove) {
+                    if(p >= 0 && p < pdf.getPageCount()) {
+                        pdf.removePage(p);
+                    }
+                }
+
+                downloadBlob(await pdf.save(), "Removed_Pages.pdf", "application/pdf");
+                updateToolStat();
+                islandNotify("Pages Removed Successfully!", "success");
+            } catch(e) {
+                islandNotify("Remove Failed.", "error");
+            }
+            input.value = '';
+        }
+
+        async function toolExtractPages(input) {
+            const files = Array.from(input.files);
+            if(!files.length) return;
+
+            const pageStr = prompt("Enter page numbers to extract/keep (comma separated, e.g., 1, 3):");
+            if(!pageStr) { input.value = ''; return; }
+
+            islandNotify("Extracting pages...", "loading", 0);
+            try {
+                const PDFDocument = window.PDFLib.PDFDocument;
+                const pdf = await PDFDocument.load(await files[0].arrayBuffer());
+                const newPdf = await PDFDocument.create();
+
+                const pagesToKeep = pageStr.split(',').map(n => parseInt(n.trim()) - 1);
+                const copiedPages = await newPdf.copyPages(pdf, pagesToKeep.filter(p => p >= 0 && p < pdf.getPageCount()));
+                copiedPages.forEach(p => newPdf.addPage(p));
+
+                downloadBlob(await newPdf.save(), "Extracted_Pages.pdf", "application/pdf");
+                updateToolStat();
+                islandNotify("Pages Extracted Successfully!", "success");
+            } catch(e) {
+                islandNotify("Extraction Failed.", "error");
+            }
+            input.value = '';
+        }
+
+        async function toolAddPageNumbers(input) {
+            const files = Array.from(input.files);
+            if(!files.length) return;
+
+            islandNotify("Adding page numbers...", "loading", 0);
+            try {
+                const PDFDocument = window.PDFLib.PDFDocument;
+                const pdf = await PDFDocument.load(await files[0].arrayBuffer());
+                
+                const { StandardFonts, rgb } = window.PDFLib;
+                const font = await pdf.embedFont(StandardFonts.Helvetica);
+                const pages = pdf.getPages();
+
+                pages.forEach((page, idx) => {
+                    const { width } = page.getSize();
+                    page.drawText(String(idx + 1), {
+                        x: width / 2,
+                        y: 20,
+                        size: 12,
+                        font: font,
+                        color: rgb(0, 0, 0)
+                    });
+                });
+
+                downloadBlob(await pdf.save(), "Numbered_" + files[0].name, "application/pdf");
+                updateToolStat();
+                islandNotify("Page Numbers Added!", "success");
+            } catch(e) {
+                islandNotify("Failed to add numbers.", "error");
+            }
+            input.value = '';
+        }
+
+        async function toolPdfToJpg(input) {
+            const files = Array.from(input.files);
+            if(!files.length) return;
+            
+            islandNotify("Converting 1st page to JPG...", "loading", 0);
+            try {
+                const arrayBuffer = await files[0].arrayBuffer();
+                const pdf = await window.pdfjsLib.getDocument({data: arrayBuffer}).promise;
+                const page = await pdf.getPage(1);
+                const viewport = page.getViewport({scale: 2.0}); // High Res
+                
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = viewport.width; 
+                canvas.height = viewport.height;
+                
+                await page.render({canvasContext: ctx, viewport: viewport}).promise;
+                
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                const a = document.createElement('a');
+                a.href = dataUrl;
+                a.download = files[0].name.replace('.pdf', '_page1.jpg');
+                a.click();
+                
+                updateToolStat();
+                islandNotify("Converted to JPG!", "success");
+            } catch(e) {
+                islandNotify("Conversion failed.", "error");
+            }
+            input.value = '';
+        }
+
+        async function toolEditPDF(input) {
+            const files = Array.from(input.files);
+            if(!files.length) return;
+            
+            islandNotify("Extracting text from PDF...", "loading", 0);
+            try {
+                const file = files[0];
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await window.pdfjsLib.getDocument({data: arrayBuffer}).promise;
+                let fullText = `<h1>${file.name.replace('.pdf', '')}</h1>`;
+                
+                for(let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    fullText += `<p>${pageText}</p>`;
+                }
+                
+                document.getElementById('editor-paper').innerHTML = fullText;
+                updateMetrics();
+                navigate('editor');
+                updateToolStat();
+                islandNotify("Text Extracted Successfully!", "success");
+            } catch (e) {
+                islandNotify("Failed to extract text (Ensure it's a valid PDF)", "error");
+            }
+            input.value = '';
+        }
+
+        async function toolMergePDF(input) {
+            const files = Array.from(input.files);
+            if(files.length < 2) {
+                islandNotify("Please select at least 2 PDFs to merge", "error");
+                input.value = ''; return;
+            }
+            
+            islandNotify("Merging PDFs...", "loading", 0);
+            try {
+                const PDFDocument = window.PDFLib.PDFDocument;
+                const mergedPdf = await PDFDocument.create();
+                
+                for(let file of files) {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await PDFDocument.load(arrayBuffer);
+                    const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+                    copiedPages.forEach((page) => mergedPdf.addPage(page));
+                }
+                
+                const mergedPdfBytes = await mergedPdf.save();
+                downloadBlob(mergedPdfBytes, "Merged_Document.pdf", "application/pdf");
+                updateToolStat();
+                islandNotify("PDFs Merged Successfully!", "success");
+            } catch (e) {
+                islandNotify("Merge Failed", "error");
+            }
+            input.value = '';
+        }
+
+        async function toolCompressPDF(input) {
+            const files = Array.from(input.files);
+            if(!files.length) return;
+            
+            islandNotify("Optimizing PDF structure...", "loading", 0);
+            try {
+                const file = files[0];
+                const arrayBuffer = await file.arrayBuffer();
+                const PDFDocument = window.PDFLib.PDFDocument;
+                
+                const pdf = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+                const optimizedBytes = await pdf.save({ useObjectStreams: true });
+                
+                downloadBlob(optimizedBytes, "Optimized_" + file.name, "application/pdf");
+                updateToolStat();
+                islandNotify("PDF Optimized Successfully!", "success");
+            } catch(e) {
+                islandNotify("Optimization Failed", "error");
+            }
+            input.value = '';
+        }
+
+        async function toolImageToPDF(input) {
+            const files = Array.from(input.files);
+            if(!files.length) return;
+
+            islandNotify("Converting Images to PDF...", "loading", 0);
+            try {
+                const PDFDocument = window.PDFLib.PDFDocument;
+                const pdfDoc = await PDFDocument.create();
+                
+                for(let file of files) {
+                    const arrayBuffer = await file.arrayBuffer();
+                    let image;
+                    if(file.type === 'image/jpeg') {
+                        image = await pdfDoc.embedJpg(arrayBuffer);
+                    } else if(file.type === 'image/png') {
+                        image = await pdfDoc.embedPng(arrayBuffer);
+                    } else {
+                        continue;
+                    }
+                    const page = pdfDoc.addPage([image.width, image.height]);
+                    page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
+                }
+                
+                const pdfBytes = await pdfDoc.save();
+                downloadBlob(pdfBytes, "Images_to_PDF.pdf", "application/pdf");
+                updateToolStat();
+                islandNotify("Image PDF Created!", "success");
+            } catch (e) {
+                islandNotify("Conversion Failed", "error");
+            }
+            input.value = '';
+        }
+
+        async function toolTxtToEditor(input) {
+            const files = Array.from(input.files);
+            if(!files.length) return;
+            
+            const file = files[0];
+            const reader = new FileReader();
+            
+            islandNotify("Importing Text...", "loading");
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const htmlText = `<h1>${file.name.replace('.txt','')}</h1><p>` + safeText.replace(/\n/g, '</p><p>') + `</p>`;
+                
+                document.getElementById('editor-paper').innerHTML = htmlText;
+                updateMetrics();
+                navigate('editor');
+                updateToolStat();
+                islandNotify("TXT Imported to Editor", "success");
+            };
+            reader.readAsText(file);
+            input.value = '';
+        }
+
+        // --- EXPORT PDF & TXT ---
+        function openExportModal() {
+            document.getElementById('exportModal').classList.add('open');
         }
 
         async function generatePDF() {
@@ -841,12 +1483,17 @@
             closeModal('exportModal'); islandNotify("Generating PDF...", "loading", 0);
 
             const printCon = document.getElementById('print-container'); printCon.innerHTML = ''; printCon.style.display = 'block';
+            
             if(includeCover) {
                 const cover = document.createElement('div'); cover.className = 'swiss-cover';
-                cover.innerHTML = `<h1>${filename.replace(/_/g, ' ')}</h1><p>AUTHOR / ${state.user.name.toUpperCase()}</p><p>DATE / ${new Date().toLocaleDateString()}</p>`;
+                cover.innerHTML = `<h1>${filename.replace(/_/g, ' ')}</h1><p>AUTHOR / ${state.userPrefs.name.toUpperCase()}</p><p>DATE / ${new Date().toLocaleDateString()}</p>`;
                 printCon.appendChild(cover);
             }
-            const clone = editor.cloneNode(true); clone.style.opacity = '1'; clone.childNodes.forEach(n => { if(n.style) n.style.opacity = '1'; });
+            
+            const clone = editor.cloneNode(true); 
+            clone.style.opacity = '1'; 
+            clone.childNodes.forEach(n => { if(n.style) n.style.opacity = '1'; });
+            
             printCon.appendChild(clone);
 
             try {
@@ -854,7 +1501,7 @@
                 
                 await addHistory(filename, 'PDF Export', editor.innerHTML); 
                 updateStat('exports'); 
-                islandNotify("PDF Downloaded & Saved to Vault", "success");
+                islandNotify("PDF Downloaded & Saved locally", "success");
             } catch(e) { islandNotify("Export Failed", "error"); } finally { printCon.style.display = 'none'; printCon.innerHTML = ''; }
         }
 
@@ -862,7 +1509,8 @@
             const filename = document.getElementById('exportFilename').value || 'document';
             closeModal('exportModal');
             
-            const text = editor.innerText;
+            let text = editor.innerText;
+
             const blob = new Blob([text], { type: "text/plain" });
             const a = document.createElement("a");
             a.href = URL.createObjectURL(blob);
@@ -872,14 +1520,17 @@
             
             await addHistory(filename, 'TXT Export', editor.innerHTML); 
             updateStat('exports'); 
-            islandNotify("Text File Downloaded & Saved to Vault", "success");
+            islandNotify("Text File Downloaded", "success");
         }
 
         // --- HISTORY VAULT ---
         async function addHistory(title, action, content = null) {
-            state.projects.unshift({ id: Date.now(), title, action, date: new Date().toISOString(), content });
+            const doc = { id: Date.now(), title, action, date: new Date().toISOString(), content };
+            state.projects.unshift(doc);
             if(state.projects.length > 50) state.projects = state.projects.slice(0, 50);
+            
             await localforage.setItem('history', state.projects);
+
             if(document.getElementById('view-history').classList.contains('active')) renderHistory();
             if(document.getElementById('view-home').classList.contains('active')) loadRecentProjects();
         }
@@ -934,21 +1585,26 @@
             dz.addEventListener('drop', e => { if(e.dataTransfer.files.length) handleOCRUpload({files: e.dataTransfer.files}); });
         }
         function handleOCRUpload(input) {
-            const file = input.files[0]; if(!file) return;
-            const r = new FileReader(); r.onload = e => { document.getElementById('ocrPreview').src = e.target.result; document.getElementById('ocrPreview').style.display = 'block'; document.getElementById('dropPlaceholder').style.display = 'none'; document.getElementById('ocrActions').style.display = 'block'; state.ocrImage = e.target.result; }; r.readAsDataURL(file);
+            const files = Array.from(input.files);
+            if(!files.length) return;
+            const r = new FileReader(); r.onload = e => { document.getElementById('ocrPreview').src = e.target.result; document.getElementById('ocrPreview').style.display = 'block'; document.getElementById('dropPlaceholder').style.display = 'none'; document.getElementById('ocrActions').style.display = 'block'; state.ocrImage = e.target.result; }; r.readAsDataURL(files[0]);
         }
         function resetOCR() { document.getElementById('ocrInput').value = ''; document.getElementById('ocrPreview').style.display = 'none'; document.getElementById('dropPlaceholder').style.display = 'block'; document.getElementById('ocrActions').style.display = 'none'; state.ocrImage = null; }
+        
         async function runOCR() {
-            if(!state.ocrImage) return; document.getElementById('btnExtract').disabled = true; islandNotify("Init AI...", "loading", 0);
+            if(!state.ocrImage) return; 
+
+            document.getElementById('btnExtract').disabled = true; islandNotify("Init AI...", "loading", 0);
             try {
                 const worker = await Tesseract.createWorker("eng", 1, { logger: m => { if(m.status === 'recognizing text') islandNotify(`Extracting: ${Math.round(m.progress * 100)}%`, "loading", 0); } });
                 const { data: { text } } = await worker.recognize(state.ocrImage); await worker.terminate();
                 if(!text.trim()) throw new Error("No text found.");
                 editor.innerHTML += `<h2>Scanned Note</h2><p>${text.replace(/\n/g, '<br>')}</p>`; await addHistory("Smart Scan", "AI Extraction");
+                
                 updateStat('scans'); updateMetrics();
                 islandNotify("Complete", "success"); setTimeout(() => { navigate('editor'); resetOCR(); }, 1000);
             } catch (err) { islandNotify("Error: " + err.message, "error"); } finally { document.getElementById('btnExtract').disabled = false; }
         }
     </script>
 </body>
-</html>
+                                               </html>
