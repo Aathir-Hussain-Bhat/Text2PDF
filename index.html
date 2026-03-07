@@ -3,1013 +3,955 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TextPDF Studio - Privacy First</title>
+    <title>TextPDF Studio - Pure Focus</title>
     
-    <!-- Fonts -->
+    <!-- Premium Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@300;400;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Dependencies (PDF & OCR - Upgraded to v5) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
-        /* --- CSS VARIABLES & THEMING --- */
+        /* --- PREMIUM MINIMALIST THEMING --- */
         :root {
-            /* Light Theme */
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --bg-body: #f1f5f9;
-            --bg-card: #ffffff;
-            --bg-sidebar: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --input-bg: #f8fafc;
-            --success: #10b981;
-            --danger: #ef4444;
-            --danger-bg: #fee2e2;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --radius: 12px;
-            --font-ui: 'Inter', sans-serif;
-            --font-doc: 'Merriweather', serif;
-            --font-code: 'Roboto Mono', monospace;
+            --bg-app: #f4f3ef; 
+            --bg-paper: #FAF9F6; 
+            --text-main: #2d2d2b; 
+            --text-muted: #8b8b88;
+            --accent: #111111; 
+            --accent-hover: #333333;
+            --border: rgba(0,0,0,0.08);
+            --island-bg: #1c1c1e;
+            --island-text: #ffffff;
+            --glass: rgba(255, 255, 255, 0.7);
+            --shadow-soft: 0 10px 40px -10px rgba(0,0,0,0.05);
+            --shadow-float: 0 20px 40px -5px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.05);
+            --radius-box: 16px;
+            --font-ui: 'Manrope', sans-serif;
+            --font-doc: 'Lora', serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
 
         [data-theme="dark"] {
-            /* Dark Theme */
-            --primary: #3b82f6;
-            --primary-hover: #60a5fa;
-            --bg-body: #0f172a;
-            --bg-card: #1e293b;
-            --bg-sidebar: #1e293b;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border: #334155;
-            --input-bg: #334155;
-            --danger-bg: #451a1a;
-            --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+            --bg-app: #121212; --bg-paper: #18181b; --text-main: #e4e4e7; --text-muted: #71717a;
+            --accent: #ffffff; --accent-hover: #d4d4d8; --border: rgba(255,255,255,0.08);
+            --island-bg: #ffffff; --island-text: #000000; --glass: rgba(24, 24, 27, 0.7);
+            --shadow-soft: 0 10px 40px -10px rgba(0,0,0,0.5);
+            --shadow-float: 0 20px 40px -5px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
         }
+
+        [data-theme="hacker"] {
+            --bg-app: #000500; --bg-paper: #000a00; --text-main: #00ff00; --text-muted: #006600;
+            --accent: #00ff00; --accent-hover: #00cc00; --border: #003300; 
+            --island-bg: #00ff00; --island-text: #000000; --glass: rgba(0, 5, 0, 0.9);
+            --shadow-float: 0 0 20px rgba(0,255,0,0.2), 0 0 0 1px #00ff00;
+            --font-ui: var(--font-mono); --font-doc: var(--font-mono);
+        }
+
+        /* E-Ink Grain Texture */
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none; z-index: 9998; mix-blend-mode: multiply;
+        }
+        [data-theme="dark"] body::before { opacity: 0.02; mix-blend-mode: screen; }
 
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        
-        body {
-            font-family: var(--font-ui);
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-            transition: background-color 0.3s ease, color 0.3s ease;
+        body { font-family: var(--font-ui); background-color: var(--bg-app); color: var(--text-main); margin: 0; display: flex; height: 100vh; overflow: hidden; transition: 0.4s ease; }
+
+        /* --- DYNAMIC ISLAND --- */
+        #dynamic-island {
+            position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%) translateY(-150%);
+            background: var(--island-bg); color: var(--island-text); padding: 0.6rem 1.2rem; border-radius: 40px; font-weight: 600; font-size: 0.85rem;
+            display: flex; align-items: center; gap: 0.75rem; box-shadow: var(--shadow-float); z-index: 10000; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0;
         }
+        #dynamic-island.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-        /* --- LOADING SCREEN --- */
-        #loading-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-body); z-index: 9999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.5s ease;
-        }
-        
-        .spinner {
-            width: 50px; height: 50px;
-            border: 5px solid var(--border); border-top-color: var(--primary);
-            border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* --- HEADER --- */
-        header {
-            background: var(--bg-card); border-bottom: 1px solid var(--border);
-            padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center; z-index: 10;
-        }
-
-        .brand { font-weight: 700; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem; color: var(--primary); cursor: pointer; }
-        .header-actions { display: flex; gap: 1rem; align-items: center; }
-
-        .profile-btn {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: var(--input-bg); border: 1px solid var(--border); color: var(--text-main);
-            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
-        }
-        .profile-btn:hover { border-color: var(--primary); color: var(--primary); }
-
-        /* --- BUTTONS --- */
-        .btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-            padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 500; font-size: 0.875rem;
-            cursor: pointer; transition: all 0.2s; border: 1px solid transparent; font-family: var(--font-ui);
-        }
-        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); }
-        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
-        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
-        
-        .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
-        .btn-ghost:hover { background: var(--input-bg); color: var(--text-main); border-color: var(--text-muted); }
-        
-        .btn-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger); }
-        .btn-danger:hover { background: var(--danger); color: white; }
-
-        .btn-icon { padding: 0.5rem; border-radius: 50%; border: none; background: transparent; color: var(--text-muted); font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
-        .btn-icon:hover { background: var(--input-bg); color: var(--primary); }
-        .btn-icon.danger:hover { color: var(--danger); background: var(--danger-bg); }
-
-        /* --- LAYOUT --- */
-        main { flex: 1; display: flex; overflow: hidden; position: relative; }
-
-        /* --- SIDEBAR --- */
+        /* --- LAYOUT & SIDEBAR --- */
         .sidebar {
-            width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; padding: 1.5rem 1rem; gap: 0.5rem;
+            width: 280px; background: transparent; border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; padding: 2rem 1.5rem; gap: 0.5rem; transition: 0.3s;
         }
-        @media(max-width: 768px) { .sidebar { display: none; } }
+        
+        /* Symmetrical Sidebar Blocks (Profile & Creator Wall) */
+        .sidebar-block {
+            display: flex; align-items: center; gap: 1rem; padding: 0.8rem; border-radius: 12px;
+            cursor: pointer; transition: all 0.2s; border: 1px solid transparent; margin-bottom: 1.5rem;
+        }
+        .sidebar-block:hover { background: var(--bg-paper); border-color: var(--border); box-shadow: var(--shadow-soft); }
+        .sidebar-block.bottom { margin-top: auto; margin-bottom: 0; }
+        
+        .avatar {
+            width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: var(--bg-app);
+            display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; flex-shrink: 0;
+            transition: transform 0.3s;
+        }
+        .avatar.gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
+        [data-theme="hacker"] .avatar { background: #003300; border: 1px solid #00ff00; color: #00ff00; }
+        
+        .user-info { display: flex; flex-direction: column; overflow: hidden; }
+        .user-info span { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .user-info strong { font-size: 0.95rem; color: var(--text-main); font-weight: 600; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
 
         .nav-item {
-            display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem;
-            border-radius: 8px; color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 0.8rem;
+            border-radius: 8px; color: var(--text-muted); cursor: pointer; transition: 0.2s; font-size: 0.9rem; font-weight: 500;
         }
-        .nav-item:hover { background: var(--input-bg); color: var(--text-main); }
-        .nav-item.active { background: rgba(37, 99, 235, 0.1); color: var(--primary); font-weight: 500; }
-
-        /* CREATOR WALL - SIDEBAR */
-        .creator-badge {
-            margin-top: auto; padding: 1rem; background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(16, 185, 129, 0.1));
-            border-radius: 8px; font-size: 0.85rem; color: var(--text-main); text-align: center;
-            border: 1px dashed var(--primary); transition: transform 0.2s;
-        }
-        .creator-badge:hover { transform: translateY(-2px); border-style: solid; }
-        .creator-badge i { color: var(--primary); margin-bottom: 5px; font-size: 1.2rem; }
+        .nav-item:hover { color: var(--text-main); background: rgba(0,0,0,0.03); }
+        [data-theme="dark"] .nav-item:hover { background: rgba(255,255,255,0.03); }
+        .nav-item.active { color: var(--accent); background: var(--bg-paper); box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
 
         /* --- WORKSPACE --- */
-        .workspace { flex: 1; display: flex; flex-direction: column; position: relative; background: var(--bg-body); overflow: hidden; }
+        .workspace { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .view { display: none; flex-direction: column; height: 100%; width: 100%; overflow-y: auto; padding: 2rem; scroll-behavior: smooth; }
+        .view.active { display: flex; animation: fadeIn 0.4s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        .view { display: none; flex-direction: column; height: 100%; width: 100%; overflow-y: auto; padding: 1.5rem; }
-        .view.active { display: flex; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* --- BUTTONS & TOGGLES --- */
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: 0.2s; border: none; font-family: var(--font-ui); }
+        .btn-primary { background: var(--accent); color: var(--bg-app); }
+        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+        .btn-ghost:hover { background: var(--bg-paper); color: var(--text-main); }
 
-        /* --- DASHBOARD (HOME) --- */
-        .dashboard-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;
-            max-width: 1000px; width: 100%; margin: 0 auto;
+        /* Toggle Switch */
+        .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .3s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        input:checked + .slider { background-color: var(--accent); }
+        [data-theme="hacker"] input:checked + .slider { background-color: #00ff00; }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* --- DASHBOARD & TEMPLATES --- */
+        .dashboard-container { max-width: 900px; margin: 0 auto; width: 100%; }
+        .dashboard-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; }
+        .dashboard-header h1 { font-size: 2.5rem; letter-spacing: -1px; margin-bottom: 0.5rem; font-weight: 600; margin-top: 0; }
+        
+        .section-title { font-size: 1.1rem; font-weight: 600; color: var(--text-muted); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: flex-end; }
+        
+        .template-scroll { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem; margin-bottom: 2rem; scrollbar-width: none; }
+        .template-scroll::-webkit-scrollbar { display: none; }
+        
+        .template-card {
+            min-width: 160px; height: 200px; background: var(--bg-paper); border: 1px solid var(--border);
+            border-radius: var(--radius-box); padding: 1.2rem; display: flex; flex-direction: column;
+            cursor: pointer; transition: all 0.3s ease; box-shadow: var(--shadow-soft); position: relative; overflow: hidden;
         }
+        .template-card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: var(--shadow-float); }
+        .template-card i { font-size: 1.5rem; color: var(--text-muted); margin-bottom: auto; transition: 0.3s; }
+        .template-card:hover i { color: var(--accent); transform: scale(1.1); }
+        .template-card strong { font-size: 0.95rem; color: var(--text-main); }
+        .template-card span { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+        .template-card::after { content:''; position:absolute; top: 45px; right: 20px; width: 40px; height: 2px; background: var(--border); box-shadow: 0 8px 0 var(--border), 0 16px 0 var(--border); opacity: 0.5;}
 
-        .card {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
-            padding: 2rem; display: flex; flex-direction: column; gap: 1rem; box-shadow: var(--shadow);
-            transition: all 0.2s; cursor: pointer;
-        }
-        .card:hover { transform: translateY(-4px); border-color: var(--primary); }
-        .card i { font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem; }
-        .card h3 { margin: 0; font-size: 1.25rem; }
-        .card p { margin: 0; color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
-
-        /* CREATOR WALL - HOME CARD */
-        .creator-card {
-            background: linear-gradient(135deg, var(--bg-card), rgba(37, 99, 235, 0.05));
-            border-color: var(--primary); text-align: center;
-        }
-
-        /* --- EDITOR --- */
-        .editor-container {
-            flex: 1; display: flex; flex-direction: column; align-items: center;
-            overflow-y: auto; /* Allows smooth scrolling */
-            padding: 1rem; padding-bottom: 5rem;
-        }
-
-        .toolbar {
-            background: var(--bg-card); padding: 0.5rem 1rem; border-radius: var(--radius);
-            box-shadow: var(--shadow); display: flex; gap: 0.5rem; margin-bottom: 1.5rem;
-            flex-wrap: wrap; justify-content: center; position: sticky; top: 0px; z-index: 5;
-            border: 1px solid var(--border);
-        }
-
+        /* --- NOTION-STYLE EDITOR --- */
+        .editor-container { max-width: 800px; width: 100%; margin: 0 auto; padding-bottom: 10rem; position: relative; }
+        .editor-top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; opacity: 0.5; transition: 0.2s; flex-wrap: wrap; gap: 10px; }
+        .editor-top-bar:hover { opacity: 1; }
+        
         .paper {
-            width: 100%; max-width: 210mm; min-height: 297mm;
-            background: #ffffff; color: #000000; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            padding: 25mm; font-family: var(--font-doc); font-size: 12pt; line-height: 1.6;
-            outline: none; transition: font-family 0.3s;
-            /* FIX: Removed 'overflow: hidden' to allow content expansion & scrolling */
-            height: max-content; 
+            width: 100%; min-height: 50vh; color: var(--text-main);
+            font-family: var(--font-doc); font-size: 1.15rem; line-height: 1.8;
+            outline: none; background: transparent; transition: 0.3s ease; padding: 20px;
         }
-        
-        .paper.template-minimal { font-family: 'Inter', sans-serif; }
-        .paper.template-academic { font-family: 'Times New Roman', serif; }
-        .paper.template-code { font-family: 'Roboto Mono', monospace; background: #f8fafc; color: #333; }
+        .paper h1 { font-family: var(--font-ui); font-size: 2.5rem; letter-spacing: -1px; margin-bottom: 1.5rem; font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;}
+        .paper h2, .paper h3 { font-family: var(--font-ui); font-weight: 600; margin-top: 2rem; }
+        .paper table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-family: var(--font-ui); font-size: 0.95rem;}
+        .paper th, .paper td { border: 1px solid var(--border); padding: 12px; text-align: left; }
+        .paper th { background: rgba(0,0,0,0.02); font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px;}
+        [data-theme="dark"] .paper th { background: rgba(255,255,255,0.02); }
+        [contenteditable]:empty:before { content: attr(placeholder); color: var(--border); display: block; }
 
-        [contenteditable]:empty:before { content: attr(placeholder); color: #ccc; display: block; }
-
-        /* --- OCR --- */
-        .ocr-area { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; max-width: 800px; margin: 0 auto; }
-        .drop-zone {
-            width: 100%; height: 300px; border: 2px dashed var(--border); border-radius: var(--radius);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: var(--bg-card); color: var(--text-muted); cursor: pointer; transition: all 0.2s;
-            position: relative; overflow: hidden;
+        /* Floating Toolbar */
+        .floating-toolbar {
+            position: absolute; display: none; gap: 4px; padding: 6px;
+            background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-float);
+            z-index: 100; transform: translateX(-50%) translateY(-120%); transition: opacity 0.2s; max-width: 90vw; flex-wrap: wrap;
         }
-        .drop-zone:hover, .drop-zone.drag-over { border-color: var(--primary); background: var(--input-bg); }
-        .drop-zone img { max-width: 100%; max-height: 100%; object-fit: contain; display: none; z-index: 2; }
-        
-        .progress-bar { width: 100%; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; display: none; }
-        .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
+        .floating-toolbar.active { display: flex; animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { from { opacity: 0; transform: translateX(-50%) translateY(-100%) scale(0.9); } to { opacity: 1; transform: translateX(-50%) translateY(-120%) scale(1); } }
+        .ft-btn { background: transparent; border: none; color: var(--text-main); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
+        .ft-btn:hover { background: rgba(0,0,0,0.05); }
+
+        /* Focus Mode */
+        .focus-mode-active .paper > * { opacity: 0.3; transition: 0.3s; }
+        .focus-mode-active .paper > .focused-block { opacity: 1; }
+
+        /* Live Metrics Counter */
+        .editor-metrics {
+            position: fixed; bottom: 2rem; right: 2rem; background: var(--glass); backdrop-filter: blur(8px);
+            padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.75rem; color: var(--text-muted);
+            border: 1px solid var(--border); box-shadow: var(--shadow-soft); transition: opacity 0.3s;
+            opacity: 0.3; pointer-events: auto; z-index: 50; font-family: var(--font-mono); cursor: pointer;
+        }
+        .workspace:hover .editor-metrics { opacity: 1; }
+        .editor-metrics:hover { color: var(--text-main); border-color: var(--accent); }
+
+        /* --- COMMAND PALETTE (CMD+K) --- */
+        .cmd-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 99999; display: flex; align-items: flex-start; justify-content: center; padding-top: 15vh; opacity: 0; pointer-events: none; transition: 0.2s; }
+        .cmd-overlay.open { opacity: 1; pointer-events: auto; }
+        .cmd-palette { background: var(--bg-paper); width: 100%; max-width: 600px; border-radius: 16px; box-shadow: var(--shadow-float); border: 1px solid var(--border); transform: scale(0.98); transition: 0.2s; }
+        .cmd-overlay.open .cmd-palette { transform: scale(1); }
+        .cmd-input { width: 100%; background: transparent; border: none; padding: 1.5rem; font-size: 1.2rem; color: var(--text-main); font-family: var(--font-ui); border-bottom: 1px solid var(--border); }
+        .cmd-list { max-height: 300px; overflow-y: auto; padding: 0.5rem; }
+        .cmd-item { padding: 0.75rem 1rem; display: flex; align-items: center; gap: 1rem; cursor: pointer; border-radius: 8px; color: var(--text-muted); font-size: 0.95rem; font-weight: 500; }
+        .cmd-item.selected, .cmd-item:hover { background: var(--accent); color: var(--bg-app); }
+
+        /* --- OCR DROPZONE --- */
+        .drop-zone { width: 100%; height: 250px; border: 1px dashed var(--border); border-radius: var(--radius-box); display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
+        .drop-zone:hover { background: var(--bg-paper); border-color: var(--accent); }
+        .drop-zone img { max-width: 100%; max-height: 100%; object-fit: contain; display: none; border-radius: 8px;}
 
         /* --- MODALS --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center;
-            z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.2s;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 5000; opacity: 0; pointer-events: none; transition: 0.2s; }
         .modal-overlay.open { opacity: 1; pointer-events: auto; }
-
-        .modal {
-            background: var(--bg-card); width: 90%; max-width: 500px; border-radius: var(--radius);
-            padding: 2rem; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.2);
-            transform: translateY(20px); transition: transform 0.2s; border: 1px solid var(--border);
-        }
+        .modal { background: var(--bg-paper); width: 90%; max-width: 420px; border-radius: 24px; padding: 2rem; box-shadow: var(--shadow-float); transform: translateY(20px); transition: 0.3s; border: 1px solid var(--border); max-height: 90vh; overflow-y: auto; }
         .modal-overlay.open .modal { transform: translateY(0); }
-        .modal-header { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
-        .modal-body { display: flex; flex-direction: column; gap: 1.25rem; }
+        .form-input, .form-select { width: 100%; padding: 0.8rem 1rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-app); color: var(--text-main); font-family: var(--font-ui); margin-top: 0.5rem; margin-bottom: 1.5rem;}
         
-        .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
-        .form-group label { font-size: 0.875rem; font-weight: 600; color: var(--text-muted); }
-        .form-input, .form-select {
-            padding: 0.8rem; border: 1px solid var(--border); border-radius: 8px;
-            background: var(--input-bg); color: var(--text-main); font-family: var(--font-ui); font-size: 1rem;
-        }
-        .form-input:focus { border-color: var(--primary); }
-        .theme-toggle-row { display: flex; justify-content: space-between; align-items: center; background: var(--input-bg); padding: 0.8rem; border-radius: 8px; }
+        /* Settings Row */
+        .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
+        .settings-row:last-child { border-bottom: none; }
+        .settings-info { display: flex; flex-direction: column; }
+        .settings-info span { font-weight: 600; font-size: 0.95rem; color: var(--text-main); }
+        .settings-info small { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;}
 
-        /* --- MOBILE NAV --- */
-        .mobile-nav {
-            position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); border-top: 1px solid var(--border);
-            display: flex; justify-content: space-around; padding: 0.75rem; z-index: 50;
+        /* --- CREATOR WALL MODAL --- */
+        .creator-modal { text-align: center; overflow: hidden; position: relative; }
+        .creator-card-3d {
+            background: linear-gradient(145deg, var(--bg-paper), var(--bg-app)); border: 1px solid var(--border);
+            border-radius: 20px; padding: 2rem; margin: 1.5rem 0; box-shadow: var(--shadow-soft);
+            transform-style: preserve-3d; transition: transform 0.1s ease-out; position: relative;
         }
-        @media(min-width: 769px) { .mobile-nav { display: none; } }
-        .mobile-nav-item {
-            display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; color: var(--text-muted);
-            background: none; border: none; gap: 4px; cursor: pointer;
-        }
-        .mobile-nav-item.active { color: var(--primary); }
-        .mobile-nav-item i { font-size: 1.25rem; }
+        .creator-card-3d .avatar { margin: 0 auto 1rem auto; width: 60px; height: 60px; font-size: 1.5rem; transform: translateZ(30px); cursor: crosshair;}
+        .creator-card-3d h2 { margin: 0; transform: translateZ(20px); font-weight: 800; letter-spacing: -1px; }
+        .creator-card-3d p { color: var(--text-muted); font-size: 0.9rem; transform: translateZ(10px); }
+        .social-pill { display: inline-flex; align-items: center; gap: 8px; background: var(--bg-app); border: 1px solid var(--border); padding: 8px 16px; border-radius: 50px; font-size: 0.8rem; font-weight: 600; margin-top: 1rem; color: var(--text-main); text-decoration: none; transition: 0.2s;}
+        .social-pill:hover { background: var(--accent); color: var(--bg-app); }
 
-        /* --- TOAST --- */
-        .toast {
-            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
-            background: #1e293b; color: white; padding: 0.8rem 1.5rem; border-radius: 50px;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); opacity: 0; pointer-events: none; transition: all 0.3s;
-            z-index: 200; font-size: 0.9rem; display: flex; align-items: center; gap: 0.75rem;
+        /* Mobile Nav & Mobile Specific Adjustments */
+        .mobile-nav { 
+            display: none; position: fixed; bottom: 0; width: 100%; 
+            background: var(--bg-paper); border-top: 1px solid var(--border); 
+            padding: 1rem; justify-content: space-around; align-items: center; z-index: 1000;
+            padding-bottom: calc(1rem + env(safe-area-inset-bottom));
         }
-        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-
-        /* --- HISTORY LIST ITEMS --- */
-        .history-item {
-            background: var(--bg-card); padding: 1rem 1.5rem; border-radius: 8px;
-            border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
-            transition: transform 0.2s, border-color 0.2s;
+        .mobile-header-actions { display: none; gap: 10px; align-items: center; }
+        
+        @media(max-width: 800px) { 
+            .mobile-header-actions { display: flex; }
+            .sidebar { display: none; } 
+            .mobile-nav { display: flex; } 
+            .workspace { padding-bottom: calc(60px + env(safe-area-inset-bottom)); } 
+            .mobile-nav i { font-size: 1.25rem; color: var(--text-muted); transition: 0.2s;}
+            .mobile-nav i.active { color: var(--accent); transform: scale(1.1);}
+            .view { padding: 1.2rem; }
+            .paper { padding: 1rem; min-height: 60vh; font-size: 1.05rem; }
+            .dashboard-header h1 { font-size: 1.8rem; margin-top: 0.2rem; }
+            .modal { padding: 1.5rem; width: 95%; }
+            .cmd-palette { width: 90%; }
+            .editor-metrics { display: none; } /* Hidden on mobile to save space */
         }
-        .history-item:hover { border-color: var(--primary); transform: translateX(4px); }
-        .empty-state { text-align: center; color: var(--text-muted); padding: 3rem; background: var(--input-bg); border-radius: var(--radius); border: 1px dashed var(--border); }
 
+        /* PDF Helper */
+        #print-container { display: none; background: white; color: black; padding: 20mm; width: 210mm; min-height: 297mm; font-family: 'Lora', serif;}
+        .swiss-cover { height: 250mm; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 50mm; page-break-after: always; font-family: 'Manrope', sans-serif;}
+        .swiss-cover h1 { font-size: 4rem; margin: 0; letter-spacing: -2px; line-height: 1; text-transform: uppercase; border-bottom: 10px solid black; padding-bottom: 20px;}
     </style>
 </head>
 <body data-theme="light">
 
-    <!-- LOADING SCREEN -->
-    <div id="loading-screen">
-        <div class="spinner"></div>
-        <h2 style="margin: 0; color: var(--primary);">TextPDF Studio</h2>
-        <p style="color: var(--text-muted); margin-top: 0.5rem;">Initializing privacy engine...</p>
+    <!-- DYNAMIC ISLAND -->
+    <div id="dynamic-island">
+        <i id="island-icon" class="fa-solid fa-circle-info"></i>
+        <span id="island-text">Ready</span>
     </div>
 
-    <!-- HEADER -->
-    <header>
-        <div class="brand" onclick="navigate('home')">
-            <i class="fa-solid fa-file-pdf"></i> TextPDF
+    <!-- COMMAND PALETTE (Cmd+K) -->
+    <div class="cmd-overlay" id="cmdOverlay" onclick="if(event.target===this) toggleCmdPalette()">
+        <div class="cmd-palette">
+            <input type="text" class="cmd-input" id="cmdInput" placeholder="Type a command or search..." autocomplete="off">
+            <div class="cmd-list" id="cmdList"></div>
         </div>
-        <div class="header-actions">
-            <div style="display: flex; align-items: center; gap: 0.5rem; margin-right: 1rem;" class="desktop-only">
-                <i class="fa-solid fa-shield-halved" style="color: var(--success);"></i>
-                <span style="font-size: 0.75rem; color: var(--text-muted);">Offline Mode</span>
+    </div>
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+        <!-- TOP LEFT: User Profile -->
+        <div class="sidebar-block" onclick="openProfileModal()">
+            <div class="avatar" id="sidebarAvatar">W</div>
+            <div class="user-info">
+                <span id="sidebarGreeting">Good morning,</span>
+                <strong id="sidebarName">Writer</strong>
             </div>
-            
-            <button class="btn btn-primary" onclick="openExportModal()">
-                <i class="fa-solid fa-download"></i> <span style="display:none; @media(min-width: 640px){display:inline;}">Export PDF</span>
-            </button>
-            
-            <button class="profile-btn" onclick="openProfileModal()" aria-label="Profile">
-                <i class="fa-solid fa-user"></i>
-            </button>
+            <i class="fa-solid fa-gear" style="margin-left:auto; color:var(--text-muted); font-size:0.8rem;"></i>
         </div>
-    </header>
 
-    <main>
-        <!-- SIDEBAR (DESKTOP) -->
-        <nav class="sidebar">
-            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin: 0.5rem 1rem;">Studio</div>
-            <a class="nav-item active" onclick="navigate('home')">
-                <i class="fa-solid fa-house"></i> Home
-            </a>
-            <a class="nav-item" onclick="navigate('editor')">
-                <i class="fa-solid fa-pen-nib"></i> Editor
-            </a>
-            <a class="nav-item" onclick="navigate('ocr')">
-                <i class="fa-solid fa-camera"></i> OCR Scan
-            </a>
-            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin: 1.5rem 1rem 0.5rem;">System</div>
-            <a class="nav-item" onclick="navigate('history')">
-                <i class="fa-solid fa-clock-rotate-left"></i> History
-            </a>
-
-            <!-- CREATOR WALL (SIDEBAR) -->
-            <div class="creator-badge">
-                <i class="fa-solid fa-code"></i><br>
-                <span>Creator Wall</span><br>
-                <strong style="font-size: 1rem; color: var(--primary);">BHAT BOYKA</strong>
+        <div class="nav-item active" onclick="navigate('home')"><i class="fa-solid fa-house"></i> Dashboard</div>
+        <div class="nav-item" onclick="navigate('editor')"><i class="fa-solid fa-pen-nib"></i> Editor</div>
+        <div class="nav-item" onclick="navigate('ocr')"><i class="fa-solid fa-camera"></i> Smart Scan</div>
+        <div class="nav-item" onclick="navigate('history')"><i class="fa-solid fa-folder-open"></i> Vault</div>
+        
+        <!-- BOTTOM LEFT: Creator Wall Aligned -->
+        <div class="sidebar-block bottom" onclick="openCreatorModal()">
+            <div class="avatar gold"><i class="fa-solid fa-crown" style="font-size: 0.9rem;"></i></div>
+            <div class="user-info">
+                <span>App crafted by</span>
+                <strong>BHAT BOYKA</strong>
             </div>
-        </nav>
+        </div>
+    </nav>
 
-        <!-- WORKSPACE -->
-        <div class="workspace">
-            
-            <!-- HOME VIEW -->
-            <div id="view-home" class="view view-home active">
-                <div style="text-align: center; margin-bottom: 3rem; margin-top: 2rem;">
-                    <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Welcome back, <span id="userNameDisplay">User</span></h1>
-                    <p style="color: var(--text-muted); font-size: 1.1rem;">Create beautiful PDFs privately and fast.</p>
-                </div>
-                
-                <div class="dashboard-grid">
-                    <div class="card" onclick="newProject()">
-                        <i class="fa-regular fa-file-lines"></i>
-                        <h3>New Document</h3>
-                        <p>Start from scratch with the WYSIWYG editor.</p>
+    <!-- WORKSPACE -->
+    <div class="workspace" id="workspace">
+        
+        <!-- DASHBOARD -->
+        <div id="view-home" class="view active">
+            <div class="dashboard-container">
+                <div class="dashboard-header">
+                    <div>
+                        <p style="color: var(--text-muted); font-weight: 600; margin-bottom: 0;">OVERVIEW</p>
+                        <h1 style="margin-top: 0;">Welcome, <span id="userNameDisplay">Writer</span>.</h1>
                     </div>
-                    <div class="card" onclick="navigate('ocr')">
-                        <i class="fa-solid fa-expand"></i>
-                        <h3>Scan Image</h3>
-                        <p>Extract text from images using on-device OCR.</p>
-                    </div>
-                    <!-- CREATOR WALL (HOME CARD) -->
-                    <div class="card creator-card" onclick="showToast('App crafted with ♥ by BHAT BOYKA')">
-                        <i class="fa-solid fa-crown" style="color: #f59e0b;"></i>
-                        <h3>Creator Wall</h3>
-                        <p>App Engineered By<br><strong style="font-size: 1.1rem; color: var(--text-main);">BHAT BOYKA</strong></p>
-                    </div>
-                </div>
-
-                <div style="margin-top: 4rem; max-width: 1000px; width: 100%; margin-left: auto; margin-right: auto;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h3 style="font-size: 1.1rem; margin: 0; color: var(--text-muted);">Recent Activity</h3>
-                        <button class="btn btn-ghost" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;" onclick="navigate('history')">View All</button>
-                    </div>
-                    <div id="recent-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- EDITOR VIEW -->
-            <div id="view-editor" class="view">
-                <div class="editor-container">
-                    <div class="toolbar">
-                        <select id="templateSelector" class="form-select" style="width: auto;" onchange="changeTemplate(this.value)">
-                            <option value="default">Standard</option>
-                            <option value="minimal">Minimalist</option>
-                            <option value="academic">Academic</option>
-                            <option value="code">Code/Note</option>
-                        </select>
-                        <div style="width: 1px; background: var(--border); height: 24px; margin: 0 0.5rem;"></div>
-                        <button class="btn-icon" title="Bold" onclick="formatDoc('bold')"><i class="fa-solid fa-bold"></i></button>
-                        <button class="btn-icon" title="Italic" onclick="formatDoc('italic')"><i class="fa-solid fa-italic"></i></button>
-                        <button class="btn-icon" title="Heading 1" onclick="formatDoc('formatBlock', 'H1')"><i class="fa-solid fa-heading"></i></button>
-                        <button class="btn-icon" title="List" onclick="formatDoc('insertUnorderedList')"><i class="fa-solid fa-list-ul"></i></button>
-                        <div style="width: 1px; background: var(--border); height: 24px; margin: 0 0.5rem;"></div>
-                        <button class="btn-ghost" onclick="document.getElementById('fileImport').click()"><i class="fa-solid fa-file-import"></i> Import</button>
-                        <input type="file" id="fileImport" accept=".txt,.md" style="display: none;" onchange="handleFileImport(this)">
-                        <button class="btn-primary" onclick="saveDraft()"><i class="fa-regular fa-floppy-disk"></i> Save</button>
-                    </div>
-
-                    <div id="editor-paper" class="paper" contenteditable="true" placeholder="Start typing here...">
-                        <h1>Untitled Document</h1>
-                        <p>This is a privacy-first editor. Your content stays on your device.</p>
-                        <p><strong>Pro tip:</strong> Keep typing. If the text becomes too long, the page will now properly expand, and you can scroll smoothly to the bottom!</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- OCR VIEW -->
-            <div id="view-ocr" class="view">
-                <div class="ocr-area">
-                    <div style="text-align: center;">
-                        <h2>Image to Text Scanner</h2>
-                        <p style="color: var(--text-muted);">Secure OCR runs 100% locally in your browser.</p>
-                    </div>
-
-                    <div class="drop-zone" id="dropZone" onclick="document.getElementById('ocrInput').click()">
-                        <input type="file" id="ocrInput" accept="image/*" style="display: none;" onchange="handleOCRUpload(this)">
-                        <div id="dropPlaceholder" style="text-align: center;">
-                            <i class="fa-solid fa-cloud-arrow-up" style="font-size: 3rem; margin-bottom: 1rem; color: var(--primary);"></i>
-                            <p>Click to upload or drag image here</p>
+                    <!-- MOBILE QUICK ACCESS CLUSTER (Visible only on mobile) -->
+                    <div class="mobile-header-actions">
+                        <div class="avatar gold" style="width: 36px; height: 36px; cursor: pointer; font-size: 0.9rem;" onclick="openCreatorModal()" title="Creator Wall">
+                            <i class="fa-solid fa-crown"></i>
                         </div>
-                        <img id="ocrPreview" alt="Preview">
-                    </div>
-
-                    <div class="progress-bar" id="ocrProgress">
-                        <div class="progress-fill" id="ocrFill"></div>
-                    </div>
-                    <div id="ocrStatus" style="font-size: 0.9rem; font-weight: 500; color: var(--primary); height: 1.2em;"></div>
-
-                    <div id="ocrActions" style="display: none; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-top: 1rem;">
-                        <button class="btn btn-primary" id="btnExtract" onclick="runOCR()"><i class="fa-solid fa-wand-magic-sparkles"></i> Extract Text</button>
-                        <button class="btn btn-ghost" onclick="resetOCR()">Clear Image</button>
+                        <div class="avatar" id="homeAvatar" style="width: 36px; height: 36px; cursor: pointer; font-size: 0.9rem;" onclick="openProfileModal()" title="Settings & Profile">W</div>
                     </div>
                 </div>
-            </div>
 
-            <!-- HISTORY VIEW -->
-            <div id="view-history" class="view">
-                <div style="width: 100%; max-width: 800px; margin: 0 auto;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                        <h2>Activity History</h2>
-                        <button class="btn btn-danger" onclick="clearHistory()">
-                            <i class="fa-solid fa-trash-can"></i> Clear All
-                        </button>
+                <div class="section-title"><span>Quick Start Presets</span></div>
+                <div class="template-scroll">
+                    <div class="template-card" onclick="useTemplate('blank')">
+                        <i class="fa-regular fa-file"></i><strong>Blank Canvas</strong><span>Start from scratch</span>
                     </div>
-                    
-                    <p style="color: var(--text-muted); margin-bottom: 2rem;">Log of PDF exports and actions. Data is stored locally.</p>
-                    
-                    <div id="history-list" style="display: flex; flex-direction: column; gap: 1rem;">
-                        <!-- Populated by JS -->
+                    <div class="template-card" onclick="useTemplate('journal')">
+                        <i class="fa-solid fa-book-open"></i><strong>Daily Journal</strong><span>Reflect & record</span>
                     </div>
+                    <div class="template-card" onclick="useTemplate('meeting')">
+                        <i class="fa-solid fa-users"></i><strong>Meeting Notes</strong><span>Agenda & Action items</span>
+                    </div>
+                    <div class="template-card" onclick="useTemplate('cornell')">
+                        <i class="fa-solid fa-table-columns"></i><strong>Cornell Notes</strong><span>Academic studying</span>
+                    </div>
+                    <div class="template-card" onclick="useTemplate('invoice')">
+                        <i class="fa-solid fa-file-invoice-dollar"></i><strong>Pro Invoice</strong><span>Bill clients beautifully</span>
+                    </div>
+                    <div class="template-card" onclick="useTemplate('proposal')">
+                        <i class="fa-solid fa-briefcase"></i><strong>Project Proposal</strong><span>Win the pitch</span>
+                    </div>
+                    <div class="template-card" onclick="useTemplate('weekly')">
+                        <i class="fa-solid fa-calendar-week"></i><strong>Weekly Planner</strong><span>Organize tasks</span>
+                    </div>
+                </div>
+
+                <div class="section-title" style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 2rem;">
+                    <span>Recent Vault Files</span>
+                    <button class="btn-ghost" style="font-size: 0.75rem; padding: 4px 8px; border:none;" onclick="navigate('history')">View All</button>
+                </div>
+                <div id="recent-list" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+            </div>
+        </div>
+
+        <!-- EDITOR -->
+        <div id="view-editor" class="view" onclick="updateFocusBlock(event)">
+            <div class="editor-container">
+                <div class="editor-top-bar">
+                    <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); letter-spacing: 0.5px;">PRESS CMD+K FOR TOOLS</span>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div id="autoSaveIndicator" style="width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: 0.3s;" title="Auto-Save Status"></div>
+                        <button class="btn-ghost" style="padding: 4px 10px; font-size: 0.8rem; border:none;" onclick="showDocumentStats()" title="Document Stats"><i class="fa-solid fa-chart-pie"></i> Stats</button>
+                        <button class="btn-ghost" style="padding: 4px 10px; font-size: 0.8rem; border:none;" onclick="toggleZenMode()"><i class="fa-solid fa-eye"></i> Focus</button>
+                        <button class="btn-ghost" style="padding: 4px 10px; font-size: 0.8rem; border:none;" onclick="saveDraft()"><i class="fa-solid fa-check"></i> Save</button>
+                    </div>
+                </div>
+
+                <div class="floating-toolbar" id="floatingToolbar">
+                    <button class="ft-btn" onclick="formatDoc('bold')"><b>B</b></button>
+                    <button class="ft-btn" onclick="formatDoc('italic')"><i>I</i></button>
+                    <div style="width: 1px; background: var(--border); margin: 4px;"></div>
+                    <button class="ft-btn" onclick="formatDoc('formatBlock', 'H1')">H1</button>
+                    <button class="ft-btn" onclick="formatDoc('formatBlock', 'H2')">H2</button>
+                    <button class="ft-btn" onclick="formatDoc('insertUnorderedList')"><i class="fa-solid fa-list"></i></button>
+                </div>
+
+                <div id="editor-paper" class="paper" contenteditable="true" placeholder="Start writing...">
+                    <h1>Untitled</h1><p>Start here...</p>
+                </div>
+            </div>
+            
+            <!-- Live Metrics Counter -->
+            <div class="editor-metrics" id="editorMetrics" onclick="showDocumentStats()" title="Click for deep details">0 words • 0 sentences • 0 lines</div>
+        </div>
+
+        <!-- OCR -->
+        <div id="view-ocr" class="view">
+            <div style="max-width: 600px; width: 100%; margin: 0 auto; margin-top: 2rem;">
+                <h1 style="margin-bottom: 0.5rem; letter-spacing: -1px;">Smart Scan</h1>
+                <p style="color: var(--text-muted); margin-bottom: 2rem;">Extract text from images. Processed entirely offline.</p>
+                
+                <div class="drop-zone" id="dropZone" onclick="document.getElementById('ocrInput').click()">
+                    <input type="file" id="ocrInput" accept="image/*" style="display: none;" onchange="handleOCRUpload(this)">
+                    <div id="dropPlaceholder"><i class="fa-solid fa-image" style="font-size: 2rem; margin-bottom: 1rem;"></i><br>Select Image</div>
+                    <img id="ocrPreview" alt="Preview">
+                </div>
+                <div id="ocrActions" style="display: none; margin-top: 1.5rem; text-align: center;">
+                    <button class="btn btn-primary" id="btnExtract" onclick="runOCR()" style="width: 100%; padding: 1rem;"><i class="fa-solid fa-microchip"></i> Start Extraction</button>
+                    <button class="btn-ghost" onclick="resetOCR()" style="margin-top: 1rem; border:none; padding: 0.5rem;">Clear</button>
                 </div>
             </div>
         </div>
-    </main>
+
+        <!-- HISTORY -->
+        <div id="view-history" class="view">
+            <div style="max-width: 600px; width: 100%; margin: 0 auto; margin-top: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+                    <div><h1 style="margin: 0; letter-spacing: -1px;">Vault</h1><p style="color: var(--text-muted); margin: 0; margin-top: 0.5rem;">Secure local storage.</p></div>
+                    <button class="btn-ghost" style="border:none; color: #ef4444;" onclick="clearHistory()">Erase All</button>
+                </div>
+                <div id="history-list"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- MOBILE NAV -->
-    <nav class="mobile-nav">
-        <button class="mobile-nav-item active" onclick="navigate('home')">
-            <i class="fa-solid fa-house"></i> Home
-        </button>
-        <button class="mobile-nav-item" onclick="navigate('editor')">
-            <i class="fa-solid fa-pen-nib"></i> Editor
-        </button>
-        <button class="mobile-nav-item" onclick="navigate('ocr')">
-            <i class="fa-solid fa-camera"></i> OCR
-        </button>
-        <button class="mobile-nav-item" onclick="navigate('history')">
-            <i class="fa-solid fa-clock-rotate-left"></i> History
-        </button>
-    </nav>
+    <div class="mobile-nav">
+        <i class="fa-solid fa-house active" onclick="navigate('home')" aria-label="Home" title="Home Dashboard"></i>
+        <i class="fa-solid fa-pen-nib" onclick="navigate('editor')" aria-label="Editor" title="Text Editor"></i>
+        <i class="fa-solid fa-camera" onclick="navigate('ocr')" aria-label="Smart Scan" title="AI Image Scanner"></i>
+        <i class="fa-solid fa-folder-open" onclick="navigate('history')" aria-label="Vault" title="Vault History"></i>
+        <i class="fa-solid fa-magnifying-glass" onclick="toggleCmdPalette()" aria-label="Search Palette" title="Search Tools"></i>
+    </div>
+
+    <!-- DOCUMENT STATS MODAL -->
+    <div class="modal-overlay" id="statsModal">
+        <div class="modal">
+            <h2 style="margin-top:0; letter-spacing:-0.5px;"><i class="fa-solid fa-chart-pie" style="color:var(--text-muted);"></i> Document Stats</h2>
+            
+            <div style="background: var(--bg-app); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
+                    <span style="font-weight: 600; color: var(--text-muted);">Words</span>
+                    <strong style="font-size: 1.2rem; color: var(--text-main);" id="statModalWords">0</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
+                    <span style="font-weight: 600; color: var(--text-muted);">Sentences</span>
+                    <strong style="font-size: 1.2rem; color: var(--text-main);" id="statModalSentences">0</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
+                    <span style="font-weight: 600; color: var(--text-muted);">Lines</span>
+                    <strong style="font-size: 1.2rem; color: var(--text-main);" id="statModalLines">0</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
+                    <span style="font-weight: 600; color: var(--text-muted);">Characters</span>
+                    <strong style="font-size: 1.2rem; color: var(--text-main);" id="statModalChars">0</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 600; color: var(--text-muted);">Est. Reading Time</span>
+                    <strong style="font-size: 1.2rem; color: var(--text-main);" id="statModalReadTime">0 min</strong>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="closeModal('statsModal')" style="width: 100%; padding: 1rem;">Done</button>
+        </div>
+    </div>
 
     <!-- EXPORT MODAL -->
     <div class="modal-overlay" id="exportModal">
         <div class="modal">
-            <div class="modal-header">
-                <span>Export PDF</span>
-                <button class="btn-icon" onclick="closeModal('exportModal')"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Filename</label>
-                    <input type="text" id="exportFilename" class="form-input" value="my-document" placeholder="document-name">
-                </div>
-                <div class="form-group">
-                    <label>Cloud Connect (Simulated)</label>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <button class="btn btn-ghost" style="flex: 1;" onclick="simulateCloud('Google Drive')">
-                            <i class="fa-brands fa-google-drive"></i> Drive
-                        </button>
-                        <button class="btn btn-ghost" style="flex: 1;" onclick="simulateCloud('Dropbox')">
-                            <i class="fa-brands fa-dropbox"></i> Dropbox
-                        </button>
-                    </div>
-                </div>
-                <button class="btn btn-primary" id="downloadBtn" onclick="generatePDF()" style="width: 100%; justify-content: center; margin-top: 1rem;">
-                    Download PDF
-                </button>
-            </div>
+            <h2 style="margin-top:0; letter-spacing:-0.5px;">Export Document</h2>
+            <label style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">FILENAME</label>
+            <input type="text" id="exportFilename" class="form-input" value="Document">
+            <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; cursor: pointer; font-size: 0.9rem; font-weight: 500;">
+                <input type="checkbox" id="generateCover" checked> Include Swiss Cover Page
+            </label>
+            <button class="btn btn-primary" onclick="generatePDF()" style="width: 100%; padding: 1rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-file-pdf"></i> High-Res PDF</button>
+            <button class="btn-ghost" onclick="generateTXT()" style="width: 100%; padding: 1rem; border: 1px solid var(--border);"><i class="fa-solid fa-file-lines"></i> Plain Text (.txt)</button>
+            <button class="btn-ghost" onclick="closeModal('exportModal')" style="width: 100%; padding: 1rem; border:none; margin-top:0.5rem;">Cancel</button>
         </div>
     </div>
 
-    <!-- PROFILE MODAL -->
+    <!-- PROFILE / SETTINGS MODAL -->
     <div class="modal-overlay" id="profileModal">
         <div class="modal">
-            <div class="modal-header">
-                <span>User Profile</span>
-                <button class="btn-icon" onclick="closeModal('profileModal')"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Display Name</label>
-                    <input type="text" id="profileName" class="form-input" placeholder="Your Name">
-                </div>
+            <h2 style="margin-top:0; letter-spacing:-0.5px;"><i class="fa-solid fa-gear" style="color:var(--text-muted);"></i> Settings</h2>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">AUTHOR PROFILE</label>
+                <input type="text" id="profileNameInput" class="form-input" placeholder="Your Name" style="margin-bottom: 0.5rem;">
                 
-                <div class="theme-toggle-row">
-                    <span>Dark Mode</span>
-                    <button class="btn-icon" id="themeToggleBtn" onclick="toggleTheme()">
-                        <i class="fa-solid fa-moon"></i>
-                    </button>
-                </div>
-
-                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem;">
-                    <i class="fa-solid fa-shield-halved"></i> Data is stored locally in your browser.
-                </div>
-
-                <button class="btn btn-primary" onclick="saveProfile()" style="width: 100%; justify-content: center;">
-                    Save Changes
-                </button>
+                <!-- Fixed: Theme select now instantly changes theme for live preview -->
+                <select id="themeSelect" class="form-select" onchange="document.body.setAttribute('data-theme', this.value)">
+                    <option value="light">E-Ink Paper (Light)</option>
+                    <option value="dark">OLED (Dark)</option>
+                    <option value="hacker">Matrix (Secret)</option>
+                </select>
             </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="font-size:0.85rem; font-weight:600; color:var(--text-muted); display:block; border-bottom:1px solid var(--border); padding-bottom:8px;">PREFERENCES</label>
+                
+                <div class="settings-row">
+                    <div class="settings-info"><span>Auto-Save</span><small>Saves silently every 30s</small></div>
+                    <label class="toggle-switch"><input type="checkbox" id="toggleAutoSave"><span class="slider"></span></label>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-info"><span>Typewriter Sounds</span><small>Plays during Focus Mode</small></div>
+                    <label class="toggle-switch"><input type="checkbox" id="toggleSound"><span class="slider"></span></label>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1.5rem; background: var(--bg-app); border-radius: 12px; padding: 1rem; display: flex; justify-content: space-around; text-align: center;">
+                <div><div style="font-size: 1.2rem; font-weight: 700; color: var(--accent);" id="statExports">0</div><div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Exports</div></div>
+                <div><div style="font-size: 1.2rem; font-weight: 700; color: var(--accent);" id="statScans">0</div><div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">AI Scans</div></div>
+            </div>
+
+            <button class="btn btn-primary" onclick="saveProfile()" style="width: 100%; padding: 1rem;">Save Settings</button>
+            <button class="btn-ghost" onclick="closeProfileModal()" style="width: 100%; padding: 1rem; border:none; margin-top:0.5rem;">Close</button>
         </div>
     </div>
 
-    <!-- TOAST -->
-    <div id="toast" class="toast">
-        <i class="fa-solid fa-circle-info" style="color: var(--primary);"></i>
-        <span id="toastMessage">Operation successful</span>
+    <!-- CREATOR WALL MODAL -->
+    <div class="modal-overlay" id="creatorModal">
+        <div class="modal creator-modal">
+            <button class="btn-ghost" onclick="closeModal('creatorModal')" style="position: absolute; top: 1rem; right: 1rem; border:none; padding: 8px;"><i class="fa-solid fa-xmark"></i></button>
+            <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); letter-spacing:1px; margin-bottom: 0.5rem;">ENGINEERED BY</div>
+            
+            <div class="creator-card-3d" id="creatorCard3D">
+                <div class="avatar gold" id="creatorEasterEggBtn"><i class="fa-solid fa-crown"></i></div>
+                <h2 style="color: var(--accent);">BHAT BOYKA</h2>
+                <p>Minimalist Design • Privacy First • PWA</p>
+            </div>
+
+            <div style="text-align: left; background: var(--bg-app); padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; font-size: 0.85rem; color: var(--text-muted);">
+                <i class="fa-solid fa-shield-halved" style="color: var(--accent); margin-bottom: 8px; font-size: 1.2rem;"></i><br>
+                This app runs 100% locally. Your text, PDFs, and AI scans never touch a server. Built for ultimate privacy and focus.
+            </div>
+
+            <a href="#" class="social-pill" onclick="islandNotify('Connecting to network...', 'loading')"><i class="fa-brands fa-github"></i> GitHub</a>
+            <a href="#" class="social-pill" onclick="islandNotify('Connecting to network...', 'loading')"><i class="fa-brands fa-twitter"></i> Follow</a>
+        </div>
     </div>
 
+    <div id="print-container"></div>
+
     <script>
-        // --- CONFIGURATION & STATE ---
-        const state = {
-            currentView: 'home',
-            ocrImage: null,
-            projects: [],
-            user: {
-                name: 'Guest',
-                theme: 'light'
-            }
+        // --- CORE STATE & INIT ---
+        const state = { 
+            user: { name: 'Writer', theme: 'light', autoSave: true, sound: true }, 
+            stats: { exports: 0, scans: 0 },
+            projects: [], ocrImage: null, zenMode: false 
         };
+        let audioCtx = null, easterEggClicks = 0, autoSaveInterval = null;
 
-        // --- INIT ---
-        window.addEventListener('load', () => {
-            if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
-                const loadingScreen = document.getElementById('loading-screen');
-                loadingScreen.innerHTML = `
-                    <div style="text-align:center; padding: 2rem; color: var(--danger);">
-                        <i class="fa-solid fa-triangle-exclamation" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                        <h3>Connection Error</h3>
-                        <p>Required PDF libraries failed to load.</p>
-                        <p>Please check your internet connection and refresh the page.</p>
-                    </div>
-                `;
-                return;
-            }
+        window.addEventListener('load', async () => {
+            localforage.config({ name: 'TextPDF_Pro', storeName: 'vault' });
+            
+            const savedUser = await localforage.getItem('userPrefs');
+            if (savedUser) state.user = { ...state.user, ...savedUser };
+            
+            const savedStats = await localforage.getItem('appStats');
+            if (savedStats) state.stats = savedStats;
+            
+            updateProfileUI(); applyTheme(state.user.theme); setupAutoSave();
+            
+            const savedProjects = await localforage.getItem('history');
+            state.projects = savedProjects || [];
+            const draft = await localforage.getItem('draft');
+            if (draft) document.getElementById('editor-paper').innerHTML = draft;
 
-            initApp();
-            setTimeout(() => {
-                const ls = document.getElementById('loading-screen');
-                if(ls) {
-                    ls.style.opacity = '0';
-                    setTimeout(() => ls.style.display = 'none', 500);
-                }
-            }, 800);
+            setupDragDrop(); loadRecentProjects(); setupFloatingToolbar(); setupMetrics(); setupCreator3D();
         });
 
-        function initApp() {
-            const savedUser = localStorage.getItem('textpdf_user');
-            if (savedUser) {
-                state.user = JSON.parse(savedUser);
-            }
-            applyTheme(state.user.theme);
-            updateProfileUI();
-            loadHistoryFromStorage();
-            
-            const draft = localStorage.getItem('textpdf_draft');
-            if (draft) {
-                document.getElementById('editor-paper').innerHTML = draft;
-            }
-
-            setupDragDrop();
-            loadRecentProjects();
+        // --- DYNAMIC ISLAND ---
+        let islandTimeout;
+        function islandNotify(text, type = 'info', duration = 3000) {
+            const island = document.getElementById('dynamic-island');
+            const icon = document.getElementById('island-icon');
+            document.getElementById('island-text').innerText = text;
+            icon.className = type === 'success' ? "fa-solid fa-check" : type === 'loading' ? "fa-solid fa-spinner fa-spin" : "fa-solid fa-circle-info";
+            island.classList.add('show');
+            clearTimeout(islandTimeout);
+            if(duration > 0) islandTimeout = setTimeout(() => island.classList.remove('show'), duration);
         }
 
-        // --- NAVIGATION ---
+        // --- UI & PROFILE ---
         function navigate(viewId) {
-            state.currentView = viewId;
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
             document.getElementById(`view-${viewId}`).classList.add('active');
-
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            const navIndex = ['home', 'editor', 'ocr', 'history'].indexOf(viewId);
-            if (navIndex >= 0 && document.querySelectorAll('.nav-item')[navIndex]) {
-                document.querySelectorAll('.nav-item')[navIndex].classList.add('active');
+            document.querySelectorAll('.mobile-nav i').forEach(el => el.classList.remove('active'));
+            const idx = ['home', 'editor', 'ocr', 'history'].indexOf(viewId);
+            if(idx >= 0) {
+                if(document.querySelectorAll('.nav-item')[idx]) document.querySelectorAll('.nav-item')[idx].classList.add('active');
+                if(document.querySelectorAll('.mobile-nav i')[idx]) document.querySelectorAll('.mobile-nav i')[idx].classList.add('active');
             }
-
-            document.querySelectorAll('.mobile-nav-item').forEach(el => el.classList.remove('active'));
-            if (navIndex >= 0 && document.querySelectorAll('.mobile-nav-item')[navIndex]) {
-                document.querySelectorAll('.mobile-nav-item')[navIndex].classList.add('active');
-            }
-
             if (viewId === 'history') renderHistory();
             if (viewId === 'home') loadRecentProjects();
         }
 
-        // --- PROFILE ---
         function updateProfileUI() {
-            document.getElementById('profileName').value = state.user.name;
+            const hour = new Date().getHours();
+            let greeting = "Good evening,";
+            if (hour < 12) greeting = "Good morning,";
+            else if (hour < 18) greeting = "Good afternoon,";
+
+            document.getElementById('sidebarGreeting').innerText = greeting;
+            document.getElementById('sidebarName').innerText = state.user.name;
             document.getElementById('userNameDisplay').innerText = state.user.name;
+            document.getElementById('sidebarAvatar').innerText = state.user.name.charAt(0).toUpperCase();
+            document.getElementById('homeAvatar').innerText = state.user.name.charAt(0).toUpperCase();
+            
+            document.getElementById('profileNameInput').value = state.user.name;
+            document.getElementById('themeSelect').value = state.user.theme;
+            document.getElementById('toggleAutoSave').checked = state.user.autoSave;
+            document.getElementById('toggleSound').checked = state.user.sound;
+            
+            document.getElementById('statExports').innerText = state.stats.exports;
+            document.getElementById('statScans').innerText = state.stats.scans;
         }
 
-        function openProfileModal() {
-            document.getElementById('profileModal').classList.add('open');
-            updateProfileUI();
-        }
-
-        function saveProfile() {
-            state.user.name = document.getElementById('profileName').value || 'Guest';
-            localStorage.setItem('textpdf_user', JSON.stringify(state.user));
-            document.getElementById('userNameDisplay').innerText = state.user.name;
+        function openProfileModal() { updateProfileUI(); document.getElementById('profileModal').classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+        
+        // Fix: Reverts Theme if user closes without saving
+        function closeProfileModal() {
+            document.body.setAttribute('data-theme', state.user.theme);
+            document.getElementById('themeSelect').value = state.user.theme;
             closeModal('profileModal');
-            showToast("Profile updated");
         }
 
-        function toggleTheme() {
-            const newTheme = state.user.theme === 'light' ? 'dark' : 'light';
-            state.user.theme = newTheme;
-            applyTheme(newTheme);
-            localStorage.setItem('textpdf_user', JSON.stringify(state.user));
+        async function saveProfile() {
+            state.user.name = document.getElementById('profileNameInput').value || 'Writer';
+            const newTheme = document.getElementById('themeSelect').value;
+            state.user.autoSave = document.getElementById('toggleAutoSave').checked;
+            state.user.sound = document.getElementById('toggleSound').checked;
+            
+            applyTheme(newTheme); updateProfileUI(); setupAutoSave();
+            await localforage.setItem('userPrefs', state.user);
+            closeModal('profileModal'); islandNotify("Settings Saved", "success");
         }
 
         function applyTheme(theme) {
             document.body.setAttribute('data-theme', theme);
-            const icon = document.querySelector('#themeToggleBtn i');
-            if (theme === 'dark') {
-                icon.className = 'fa-solid fa-sun';
-            } else {
-                icon.className = 'fa-solid fa-moon';
+            state.user.theme = theme;
+        }
+
+        // --- CREATOR WALL & EASTER EGG ---
+        function openCreatorModal() { document.getElementById('creatorModal').classList.add('open'); }
+        
+        function setupCreator3D() {
+            const card = document.getElementById('creatorCard3D');
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+                const centerX = rect.width / 2; const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -10;
+                const rotateY = ((x - centerX) / centerX) * 10;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+            card.addEventListener('mouseleave', () => card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`);
+        }
+
+        document.getElementById('creatorEasterEggBtn').addEventListener('click', () => {
+            easterEggClicks++;
+            if(easterEggClicks === 1) setTimeout(() => easterEggClicks = 0, 3000);
+            if(easterEggClicks >= 5) {
+                easterEggClicks = 0; confetti({ particleCount: 200, spread: 120, origin: { y: 0.5 }, colors: ['#00ff00', '#ffffff'] });
+                applyTheme('hacker'); document.getElementById('themeSelect').value = 'hacker'; 
+                state.user.theme = 'hacker'; localforage.setItem('userPrefs', state.user);
+                islandNotify("Matrix Unlocked. Welcome.", "success");
+            }
+        });
+
+        // --- TEMPLATES (Click to Use) ---
+        function useTemplate(type) {
+            const paper = document.getElementById('editor-paper');
+            const d = new Date().toLocaleDateString(); const n = state.user.name;
+            let html = '';
+            switch(type) {
+                case 'blank': html = `<h1>Untitled</h1><p>Start writing...</p>`; break;
+                case 'journal': html = `<h1>Daily Journal</h1><p><b>Date:</b> ${d}</p><h3>Intentions</h3><ul><li>[ ] </li></ul><h3>Notes</h3><p></p>`; break;
+                case 'meeting': html = `<h1>Meeting Notes</h1><p><b>Date:</b> ${d} | <b>Attendees:</b> ${n}, </p><h3>Agenda</h3><ul><li></li></ul><h3>Action Items</h3><ul><li>[ ] </li></ul>`; break;
+                case 'invoice': html = `<h1 style="text-align:right;">INVOICE</h1><p><b>From:</b> ${n}<br><b>Date:</b> ${d}</p><h3>Billed To:</h3><p>[Client Name]</p><table><tr><th>Description</th><th>Amount</th></tr><tr><td>Services</td><td>$0.00</td></tr></table>`; break;
+                case 'proposal': html = `<h1>Project Proposal</h1><h2>1. Executive Summary</h2><p></p><h2>2. Objectives</h2><ul><li></li></ul><h2>3. Timeline & Budget</h2><p></p>`; break;
+                case 'cornell': html = `<h1>Cornell Notes</h1><p><b>Topic:</b> [Subject] | <b>Date:</b> ${d}</p><table><tr><th style="width:30%;">Cues / Questions</th><th>Notes</th></tr><tr><td style="height:200px; vertical-align:top;"></td><td style="vertical-align:top;"></td></tr><tr><th colspan="2">Summary</th></tr><tr><td colspan="2" style="height:100px; vertical-align:top;"></td></tr></table>`; break;
+                case 'weekly': html = `<h1>Weekly Planner</h1><h3>Monday</h3><ul><li>[ ] </li></ul><h3>Tuesday</h3><ul><li>[ ] </li></ul><h3>Wednesday</h3><ul><li>[ ] </li></ul><h3>Thursday</h3><ul><li>[ ] </li></ul><h3>Friday</h3><ul><li>[ ] </li></ul>`; break;
+            }
+            paper.innerHTML = html; updateMetrics(); navigate('editor'); islandNotify("Template Applied", "success");
+        }
+
+        // --- EDITOR, AUTOSAVE, & METRICS ---
+        const editor = document.getElementById('editor-paper');
+        const fToolbar = document.getElementById('floatingToolbar');
+
+        function setupFloatingToolbar() {
+            document.addEventListener('selectionchange', () => {
+                const sel = window.getSelection();
+                if (!sel.rangeCount || sel.isCollapsed || !editor.contains(sel.anchorNode)) { fToolbar.classList.remove('active'); return; }
+                const rect = sel.getRangeAt(0).getBoundingClientRect();
+                fToolbar.style.left = `${rect.left + (rect.width / 2)}px`; fToolbar.style.top = `${rect.top + window.scrollY}px`;
+                fToolbar.classList.add('active');
+            });
+        }
+        function formatDoc(cmd, val = null) { document.execCommand(cmd, false, val); editor.focus(); }
+        
+        async function saveDraft(silent = false) { 
+            const indicator = document.getElementById('autoSaveIndicator');
+            if(!silent) islandNotify("Saving...", "loading", 1000);
+            indicator.style.background = 'var(--accent)';
+            
+            const content = editor.innerHTML;
+            await localforage.setItem('draft', content); 
+            
+            // Fix: Actually save physical files to Vault when clicking "Save" manually
+            if(!silent) {
+                let docTitle = "Untitled Document";
+                const h1 = editor.querySelector('h1');
+                if(h1 && h1.innerText.trim()) docTitle = h1.innerText.trim();
+                await addHistory(docTitle, 'Manual Save', content);
+            }
+            
+            setTimeout(() => {
+                indicator.style.background = 'var(--border)';
+                if(!silent) islandNotify("Saved to Vault", "success");
+            }, 800);
+        }
+
+        function setupAutoSave() {
+            clearInterval(autoSaveInterval);
+            if(state.user.autoSave) {
+                autoSaveInterval = setInterval(() => saveDraft(true), 30000); // 30 seconds
             }
         }
 
-        // --- EDITOR LOGIC ---
-        function formatDoc(cmd, value = null) {
-            document.execCommand(cmd, false, value);
-            document.getElementById('editor-paper').focus();
+        function setupMetrics() {
+            editor.addEventListener('input', updateMetrics);
+            setTimeout(updateMetrics, 500);
         }
 
-        function changeTemplate(templateName) {
-            const paper = document.getElementById('editor-paper');
-            paper.className = `paper template-${templateName}`;
+        function updateMetrics() {
+            const text = editor.innerText || '';
+            const textTrimmed = text.trim();
+            const words = textTrimmed ? textTrimmed.split(/\s+/).filter(w => w.length > 0).length : 0;
+            const sentences = textTrimmed ? text.split(/[.!?]+/).filter(s => s.trim().length > 0).length : 0;
+            const lines = textTrimmed ? text.split(/\n/).length : 0;
+            
+            document.getElementById('editorMetrics').innerText = `${words} words • ${sentences} sentences • ${lines} lines`;
         }
 
-        function newProject() {
-            document.getElementById('editor-paper').innerHTML = '<h1>Untitled Document</h1><p>Start typing...</p>';
-            document.getElementById('templateSelector').value = 'default';
-            document.getElementById('editor-paper').className = 'paper';
-            navigate('editor');
-            showToast("New document started");
+        function showDocumentStats() {
+            const text = editor.innerText || '';
+            const textTrimmed = text.trim();
+            const words = textTrimmed ? textTrimmed.split(/\s+/).filter(w => w.length > 0).length : 0;
+            const sentences = textTrimmed ? text.split(/[.!?]+/).filter(s => s.trim().length > 0).length : 0;
+            const lines = textTrimmed ? text.split(/\n/).length : 0;
+            const chars = text.length;
+            const readTime = Math.max(1, Math.ceil(words / 200));
+
+            document.getElementById('statModalWords').innerText = words;
+            document.getElementById('statModalSentences').innerText = sentences;
+            document.getElementById('statModalLines').innerText = lines;
+            document.getElementById('statModalChars').innerText = chars;
+            document.getElementById('statModalReadTime').innerText = readTime + " min";
+
+            document.getElementById('statsModal').classList.add('open');
         }
 
-        function handleFileImport(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const text = e.target.result;
-                const htmlContent = text.replace(/\n/g, '<br>');
-                document.getElementById('editor-paper').innerHTML += `<br><br>${htmlContent}`;
-                navigate('editor');
-                showToast("Text file imported");
-                addToHistory(file.name, 'Imported TXT/MD');
-            };
-            reader.readAsText(file);
-            input.value = '';
+        function toggleZenMode() {
+            state.zenMode = !state.zenMode;
+            document.body.classList.toggle('focus-mode-active', state.zenMode);
+            islandNotify(state.zenMode ? "Focus Mode On" : "Focus Mode Off", "info");
+            if(state.zenMode && state.user.sound && !audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
+        }
+        function updateFocusBlock() {
+            if(!state.zenMode) return;
+            document.querySelectorAll('.focused-block').forEach(el => el.classList.remove('focused-block'));
+            const sel = window.getSelection();
+            if(sel.rangeCount > 0) {
+                let node = sel.anchorNode; if(node.nodeType === 3) node = node.parentNode;
+                while(node && node !== editor) {
+                    if(['P','H1','H2','H3','UL','LI','TABLE'].includes(node.tagName)) { node.classList.add('focused-block'); break; }
+                    node = node.parentNode;
+                }
+            }
+        }
+        editor.addEventListener('keydown', () => {
+            updateFocusBlock();
+            if(!state.zenMode || !audioCtx || !state.user.sound) return;
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.type = 'square'; osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.03);
+            gain.gain.setValueAtTime(0.02, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.03);
+        });
+
+        // --- COMMAND PALETTE ---
+        const commands = [
+            { t: 'New Blank Canvas', i: 'fa-file', a: () => useTemplate('blank') },
+            { t: 'Scan Image (AI OCR)', i: 'fa-camera', a: () => navigate('ocr') },
+            { t: 'Export Document', i: 'fa-download', a: () => { document.getElementById('exportModal').classList.add('open'); } },
+            { t: 'Document Stats (Words & Lines)', i: 'fa-chart-pie', a: showDocumentStats },
+            { t: 'Toggle Focus Mode', i: 'fa-eye', a: toggleZenMode },
+            { t: 'Open Settings', i: 'fa-gear', a: openProfileModal },
+        ];
+        document.addEventListener('keydown', (e) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); toggleCmdPalette(); } });
+        
+        const cmdInput = document.getElementById('cmdInput'); const cmdList = document.getElementById('cmdList');
+        function toggleCmdPalette() {
+            const overlay = document.getElementById('cmdOverlay');
+            if(overlay.classList.contains('open')) { overlay.classList.remove('open'); return; }
+            overlay.classList.add('open'); cmdInput.value = ''; renderCommands(commands); setTimeout(() => cmdInput.focus(), 100);
+        }
+        cmdInput.addEventListener('input', e => renderCommands(commands.filter(c => c.t.toLowerCase().includes(e.target.value.toLowerCase()))));
+        cmdInput.addEventListener('keydown', e => {
+            const items = document.querySelectorAll('.cmd-item'); let sel = Array.from(items).findIndex(el => el.classList.contains('selected'));
+            if(e.key === 'ArrowDown') { e.preventDefault(); items.forEach(el=>el.classList.remove('selected')); items[(sel+1)%items.length].classList.add('selected'); }
+            if(e.key === 'ArrowUp') { e.preventDefault(); items.forEach(el=>el.classList.remove('selected')); items[(sel-1+items.length)%items.length].classList.add('selected'); }
+            if(e.key === 'Enter') { e.preventDefault(); document.querySelector('.cmd-item.selected')?.click(); }
+        });
+        function renderCommands(list) {
+            cmdList.innerHTML = ''; if(!list.length) { cmdList.innerHTML = `<div style="padding:1rem; color:var(--text-muted);">No commands found.</div>`; return; }
+            list.forEach((c, i) => {
+                const d = document.createElement('div'); d.className = `cmd-item ${i===0?'selected':''}`;
+                d.innerHTML = `<i class="fa-solid ${c.i}"></i> ${c.t}`; d.onclick = () => { c.a(); toggleCmdPalette(); }; cmdList.appendChild(d);
+            });
         }
 
-        function saveDraft() {
-            const content = document.getElementById('editor-paper').innerHTML;
-            localStorage.setItem('textpdf_draft', content);
-            showToast("Draft saved locally");
+        // --- EXPORT PDF & TXT ---
+        async function updateStat(key) {
+            state.stats[key]++;
+            await localforage.setItem('appStats', state.stats);
         }
 
-        // --- PDF GENERATION ---
         async function generatePDF() {
-            const btn = document.getElementById('downloadBtn');
-            const originalText = btn.innerHTML;
-
-            if (!window.jspdf) {
-                alert("Error: jsPDF library is missing. Please refresh the page.");
-                return;
-            }
-
-            const { jsPDF } = window.jspdf;
             const filename = document.getElementById('exportFilename').value || 'document';
-            const paper = document.getElementById('editor-paper');
+            const includeCover = document.getElementById('generateCover').checked;
+            closeModal('exportModal'); islandNotify("Generating PDF...", "loading", 0);
 
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generating...`;
-            btn.disabled = true;
+            const printCon = document.getElementById('print-container'); printCon.innerHTML = ''; printCon.style.display = 'block';
+            if(includeCover) {
+                const cover = document.createElement('div'); cover.className = 'swiss-cover';
+                cover.innerHTML = `<h1>${filename.replace(/_/g, ' ')}</h1><p>AUTHOR / ${state.user.name.toUpperCase()}</p><p>DATE / ${new Date().toLocaleDateString()}</p>`;
+                printCon.appendChild(cover);
+            }
+            const clone = editor.cloneNode(true); clone.style.opacity = '1'; clone.childNodes.forEach(n => { if(n.style) n.style.opacity = '1'; });
+            printCon.appendChild(clone);
 
             try {
-                const canvas = await html2canvas(paper, {
-                    scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false
-                });
-
-                if (!canvas || canvas.width === 0 || canvas.height === 0) throw new Error("Generated canvas is empty.");
-
-                const imgData = canvas.toDataURL('image/jpeg', 0.95);
-                const imgWidth = 190; 
-                const pageHeight = 297;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                let heightLeft = imgHeight;
-                let position = 10;
-
-                const doc = new jsPDF('p', 'mm', 'a4');
-
-                doc.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-
-                while (heightLeft >= 0) {
-                    position = heightLeft - imgHeight;
-                    doc.addPage();
-                    doc.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
-                }
+                await html2pdf().set({ margin: 15, filename: filename+'.pdf', html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(printCon).save();
                 
-                const pdfBlob = doc.output('blob');
-                const link = document.createElement('a');
-                link.href = window.URL.createObjectURL(pdfBlob);
-                link.download = filename + '.pdf';
-                
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                setTimeout(() => window.URL.revokeObjectURL(link.href), 100);
+                // Fix: Vault strictly stores the document upon Export so it's accessible
+                await addHistory(filename, 'PDF Export', editor.innerHTML); 
+                updateStat('exports'); 
+                islandNotify("PDF Downloaded & Saved to Vault", "success");
+            } catch(e) { islandNotify("Export Failed", "error"); } finally { printCon.style.display = 'none'; printCon.innerHTML = ''; }
+        }
 
-                addToHistory(filename, 'PDF Export');
-                closeModal('exportModal');
-                showToast("PDF Downloaded Successfully");
+        async function generateTXT() {
+            const filename = document.getElementById('exportFilename').value || 'document';
+            closeModal('exportModal');
+            
+            const text = editor.innerText;
+            const blob = new Blob([text], { type: "text/plain" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = filename + ".txt";
+            a.click();
+            URL.revokeObjectURL(a.href);
+            
+            // Fix: Vault strictly stores the document upon Export so it's accessible
+            await addHistory(filename, 'TXT Export', editor.innerHTML); 
+            updateStat('exports'); 
+            islandNotify("Text File Downloaded & Saved to Vault", "success");
+        }
 
-            } catch (error) {
-                console.error("PDF Generation Failed:", error);
-                alert("Failed to generate PDF: " + error.message);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+        // --- HISTORY VAULT (Now equipped with full Content Storage and Loading) ---
+        async function addHistory(title, action, content = null) {
+            state.projects.unshift({ id: Date.now(), title, action, date: new Date().toISOString(), content });
+            if(state.projects.length > 50) state.projects = state.projects.slice(0, 50);
+            await localforage.setItem('history', state.projects);
+            if(document.getElementById('view-history').classList.contains('active')) renderHistory();
+            if(document.getElementById('view-home').classList.contains('active')) loadRecentProjects();
+        }
+        
+        async function clearHistory() { state.projects = []; await localforage.setItem('history', []); renderHistory(); loadRecentProjects(); islandNotify("Vault Erased", "success"); }
+        
+        function loadVaultDoc(id) {
+            const doc = state.projects.find(p => p.id === id);
+            if (doc && doc.content) {
+                editor.innerHTML = doc.content;
+                updateMetrics();
+                navigate('editor');
+                islandNotify("Document Loaded", "success");
             }
-        }
-
-        // --- HISTORY SYSTEM (IMPROVED) ---
-        function loadHistoryFromStorage() {
-            const stored = localStorage.getItem('textpdf_projects');
-            if (stored) {
-                try { state.projects = JSON.parse(stored); } 
-                catch (e) { state.projects = []; }
-            } else {
-                state.projects = [];
-            }
-        }
-
-        function addToHistory(name, action) {
-            const newItem = { id: Date.now(), title: name, action: action, date: new Date().toISOString() };
-            state.projects.unshift(newItem);
-            if (state.projects.length > 50) state.projects = state.projects.slice(0, 50);
-            localStorage.setItem('textpdf_projects', JSON.stringify(state.projects));
-            if(state.currentView === 'history') renderHistory();
-            if(state.currentView === 'home') loadRecentProjects();
-        }
-
-        function deleteHistoryItem(id) {
-            state.projects = state.projects.filter(p => p.id !== id);
-            localStorage.setItem('textpdf_projects', JSON.stringify(state.projects));
-            renderHistory();
-            showToast("Item removed from history");
         }
 
         function renderHistory() {
-            const list = document.getElementById('history-list');
-            list.innerHTML = '';
-
-            if (state.projects.length === 0) {
-                list.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fa-solid fa-clipboard-list" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5;"></i>
-                        <p>No history found. Export a PDF or run an OCR scan to see activity here.</p>
-                    </div>
-                `;
-                return;
-            }
-
+            const list = document.getElementById('history-list'); list.innerHTML = '';
+            if(!state.projects.length) { list.innerHTML = `<p style="color:var(--text-muted);">Vault is empty.</p>`; return; }
             state.projects.forEach(p => {
-                const item = document.createElement('div');
-                item.className = 'history-item';
+                const hasContent = !!p.content;
+                // Add an "Open" button exclusively to vault elements holding saved content
+                const openBtn = hasContent ? `<button class="btn-ghost" style="padding:6px 12px; font-size:0.8rem; border:1px solid var(--border);" onclick="loadVaultDoc(${p.id})"><i class="fa-solid fa-folder-open"></i> Open</button>` : '';
                 
-                // Format Date nicely
-                const dateObj = new Date(p.date);
-                const dateStr = dateObj.toLocaleDateString() + ' • ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                
-                // Icon based on action
-                let iconClass = "fa-file-pdf";
-                if(p.action.includes('OCR')) iconClass = "fa-camera";
-                if(p.action.includes('Cloud')) iconClass = "fa-cloud-arrow-up";
-
-                item.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <div style="background: var(--input-bg); width: 45px; height: 45px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.2rem;">
-                            <i class="fa-solid ${iconClass}"></i>
-                        </div>
-                        <div>
-                            <div style="font-weight: 600; font-size: 1.05rem; color: var(--text-main);">${p.title}</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
-                                <i class="fa-regular fa-clock"></i> ${dateStr} &mdash; <strong>${p.action}</strong>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="btn-icon danger" onclick="deleteHistoryItem(${p.id})" title="Delete Record">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                `;
-                list.appendChild(item);
+                list.innerHTML += `<div style="padding:1rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                    <div><div style="font-weight:600;">${p.title}</div><div style="font-size:0.8rem; color:var(--text-muted);">${new Date(p.date).toLocaleDateString()} &bull; ${p.action}</div></div>
+                    <div>${openBtn}</div>
+                </div>`;
             });
         }
-
-        function clearHistory() {
-            if(state.projects.length === 0) return;
-            if(confirm("Are you sure you want to clear all activity history? This cannot be undone.")) {
-                state.projects = [];
-                localStorage.removeItem('textpdf_projects');
-                renderHistory();
-                loadRecentProjects();
-                showToast("History cleared successfully");
-            }
-        }
-
         function loadRecentProjects() {
-            const list = document.getElementById('recent-list');
-            list.innerHTML = '';
-            
-            const recents = state.projects.slice(0, 3);
-            if (recents.length === 0) {
-                list.innerHTML = `<div class="empty-state" style="padding: 2rem;"><p style="margin:0;">No recent activity yet.</p></div>`;
-                return;
-            }
-
-            recents.forEach(p => {
-                const item = document.createElement('div');
-                item.className = 'history-item';
-                item.style.cursor = 'pointer';
-                item.onclick = () => showToast(`Record: ${p.title}`);
+            const list = document.getElementById('recent-list'); list.innerHTML = '';
+            if(!state.projects.length) { list.innerHTML = `<p style="color:var(--text-muted);">No activity.</p>`; return; }
+            state.projects.slice(0,3).forEach(p => {
+                const hasContent = !!p.content;
+                const clickAttr = hasContent ? `onclick="loadVaultDoc(${p.id})"` : '';
+                const styleAttr = hasContent ? `cursor:pointer;` : '';
+                const titleHtml = hasContent ? `<span style="font-weight:500; color:var(--text-main); text-decoration:underline; text-decoration-color:var(--border); text-underline-offset: 4px;" title="Click to open">${p.title}</span>` : `<span style="font-weight:500;">${p.title}</span>`;
                 
-                let iconClass = "fa-file-pdf";
-                if(p.action.includes('OCR')) iconClass = "fa-camera";
-
-                item.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <i class="fa-solid ${iconClass}" style="color: var(--primary); font-size: 1.2rem;"></i>
-                        <div>
-                            <div style="font-weight: 500;">${p.title}</div>
-                            <div style="font-size: 0.75rem; color: var(--text-muted);">${p.action} &bull; ${new Date(p.date).toLocaleDateString()}</div>
-                        </div>
-                    </div>
-                    <i class="fa-solid fa-chevron-right" style="color: var(--text-muted); font-size: 0.8rem;"></i>
-                `;
-                list.appendChild(item);
+                list.innerHTML += `<div style="padding:0.8rem 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; transition:0.2s; ${styleAttr}" ${clickAttr} onmouseover="this.style.background='var(--bg-paper)'" onmouseout="this.style.background='transparent'">
+                    ${titleHtml}
+                    <span style="font-size:0.8rem; color:var(--text-muted);">${p.action}</span>
+                </div>`;
             });
         }
 
-        // --- OCR LOGIC (FIXED SYNTAX FOR TESSERACT.JS V5) ---
+        // --- OCR ---
         function setupDragDrop() {
-            const dropZone = document.getElementById('dropZone');
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                dropZone.addEventListener(eventName, preventDefaults, false);
-            });
-            function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
-            
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-over'), false);
-            });
-            ['dragleave', 'drop'].forEach(eventName => {
-                dropZone.addEventListener(eventName, () => dropZone.classList.remove('drag-over'), false);
-            });
-
-            dropZone.addEventListener('drop', handleDrop, false);
-            function handleDrop(e) {
-                const dt = e.dataTransfer;
-                if(dt.files.length) {
-                    const input = document.getElementById('ocrInput');
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(dt.files[0]);
-                    input.files = dataTransfer.files;
-                    handleOCRUpload(input);
-                }
-            }
+            const dz = document.getElementById('dropZone');
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); }));
+            ['dragenter', 'dragover'].forEach(e => dz.addEventListener(e, () => dz.classList.add('drag-over')));
+            ['dragleave', 'drop'].forEach(e => dz.addEventListener(e, () => dz.classList.remove('drag-over')));
+            dz.addEventListener('drop', e => { if(e.dataTransfer.files.length) handleOCRUpload({files: e.dataTransfer.files}); });
         }
-
         function handleOCRUpload(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = document.getElementById('ocrPreview');
-                img.src = e.target.result;
-                img.style.display = 'block';
-                document.getElementById('dropPlaceholder').style.display = 'none';
-                document.getElementById('ocrActions').style.display = 'flex';
-                document.getElementById('ocrStatus').textContent = 'Image loaded. Ready to extract.';
-                document.getElementById('ocrStatus').style.color = 'var(--text-muted)';
-                state.ocrImage = e.target.result;
-            };
-            reader.readAsDataURL(file);
+            const file = input.files[0]; if(!file) return;
+            const r = new FileReader(); r.onload = e => { document.getElementById('ocrPreview').src = e.target.result; document.getElementById('ocrPreview').style.display = 'block'; document.getElementById('dropPlaceholder').style.display = 'none'; document.getElementById('ocrActions').style.display = 'block'; state.ocrImage = e.target.result; }; r.readAsDataURL(file);
         }
-
-        function resetOCR() {
-            document.getElementById('ocrInput').value = '';
-            document.getElementById('ocrPreview').style.display = 'none';
-            document.getElementById('ocrPreview').src = '';
-            document.getElementById('dropPlaceholder').style.display = 'block';
-            document.getElementById('ocrActions').style.display = 'none';
-            document.getElementById('ocrProgress').style.display = 'none';
-            document.getElementById('ocrStatus').textContent = '';
-            document.getElementById('ocrFill').style.width = '0%';
-            state.ocrImage = null;
-        }
-
+        function resetOCR() { document.getElementById('ocrInput').value = ''; document.getElementById('ocrPreview').style.display = 'none'; document.getElementById('dropPlaceholder').style.display = 'block'; document.getElementById('ocrActions').style.display = 'none'; state.ocrImage = null; }
         async function runOCR() {
-            if (!state.ocrImage) return;
-            const statusEl = document.getElementById('ocrStatus');
-            const progressContainer = document.getElementById('ocrProgress');
-            const progressFill = document.getElementById('ocrFill');
-            const btnExtract = document.getElementById('btnExtract');
-            
-            progressContainer.style.display = 'block';
-            statusEl.style.color = "var(--primary)";
-            statusEl.textContent = "Loading Tesseract Engine...";
-            btnExtract.disabled = true;
-
+            if(!state.ocrImage) return; document.getElementById('btnExtract').disabled = true; islandNotify("Init AI...", "loading", 0);
             try {
-                // Correct syntax for Tesseract.js v5
-                const worker = await Tesseract.createWorker("eng", 1, {
-                    logger: m => {
-                        if (m.status === 'recognizing text') {
-                            const pct = Math.round(m.progress * 100);
-                            progressFill.style.width = `${pct}%`;
-                            statusEl.textContent = `Scanning Image: ${pct}%`;
-                        } else {
-                            statusEl.textContent = `Initializing: ${m.status}...`;
-                        }
-                    }
-                });
-
-                statusEl.textContent = "Extracting text... please wait.";
-                const { data: { text } } = await worker.recognize(state.ocrImage);
-                await worker.terminate();
-
-                if(!text || text.trim() === '') {
-                    throw new Error("No readable text found in image.");
-                }
-
-                const formattedText = text.replace(/\n/g, '<br>');
-                const paper = document.getElementById('editor-paper');
-                
-                paper.innerHTML += `<br><br><hr><h3 style="color:var(--primary);">Scanned Text Result:</h3><p>${formattedText}</p>`;
-                
-                addToHistory("Image Scan", "OCR Extraction");
-                showToast("Text extracted successfully!");
-                navigate('editor');
-                resetOCR();
-
-            } catch (err) {
-                console.error("OCR Error:", err);
-                statusEl.textContent = "Error: " + (err.message || "Failed to process image.");
-                statusEl.style.color = "var(--danger)";
-                progressFill.style.background = "var(--danger)";
-            } finally {
-                btnExtract.disabled = false;
-            }
-        }
-
-        // --- UTILS ---
-        function openExportModal() {
-            document.getElementById('exportModal').classList.add('open');
-            const title = document.querySelector('#editor-paper h1')?.innerText || 'document';
-            document.getElementById('exportFilename').value = title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-        }
-
-        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-        function simulateCloud(provider) {
-            const btn = event.currentTarget;
-            const icon = btn.innerHTML;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
-            setTimeout(() => {
-                btn.innerHTML = icon;
-                showToast(`Saved to ${provider} (Simulated)`);
-                const filename = document.getElementById('exportFilename').value || 'document';
-                addToHistory(filename, `Cloud Sync (${provider})`);
-            }, 1500);
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastMessage').innerText = msg;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
+                const worker = await Tesseract.createWorker("eng", 1, { logger: m => { if(m.status === 'recognizing text') islandNotify(`Extracting: ${Math.round(m.progress * 100)}%`, "loading", 0); } });
+                const { data: { text } } = await worker.recognize(state.ocrImage); await worker.terminate();
+                if(!text.trim()) throw new Error("No text found.");
+                editor.innerHTML += `<h2>Scanned Note</h2><p>${text.replace(/\n/g, '<br>')}</p>`; await addHistory("Smart Scan", "AI Extraction");
+                updateStat('scans'); updateMetrics();
+                islandNotify("Complete", "success"); setTimeout(() => { navigate('editor'); resetOCR(); }, 1000);
+            } catch (err) { islandNotify("Error: " + err.message, "error"); } finally { document.getElementById('btnExtract').disabled = false; }
         }
     </script>
 </body>
